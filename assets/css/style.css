@@ -56,3 +56,4 @@ em, .mono { font-style: italic; }
   .menu { display: flex; flex-wrap: wrap; gap: 0 1.1rem; }
   main { padding: 1.5rem 1rem 3rem; }
 }
+.meta { color: var(--muted); font-size: .9rem; line-height: 1.5; }
