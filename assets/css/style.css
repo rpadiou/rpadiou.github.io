@@ -96,3 +96,6 @@ details[open] .toggle::before { content: "▾ "; }
 .project summary:hover .toggle { text-decoration: underline; }
 figure.textonly { margin-top: .6rem; }
 .plinks { margin-bottom: .8rem; }
+
+.avatar { display: block; width: 132px; height: 132px; border-radius: 50%; object-fit: cover; border: 1px solid var(--rule); margin: 0 0 1.1rem; }
+@media (max-width: 800px) { .avatar { width: 92px; height: 92px; margin-bottom: .8rem; } }

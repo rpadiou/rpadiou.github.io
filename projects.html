@@ -16,6 +16,7 @@
 <div class="layout">
 
   <header class="sidebar">
+    <img class="avatar" src="assets/img/portrait.jpg" width="480" height="480" alt="Portrait of Raphaël Padiou">
     <h1>Raphaël Padiou</h1>
     <p class="status">M2 student, MPRI<br>Télécom Paris</p>
     <nav aria-label="Pages">
@@ -46,7 +47,19 @@
           </summary>
 
         <h3>The model</h3>
-        <p>Portfolio risk that accounts for skewness and kurtosis is a polynomial of degree four in the weights <math><mi>x</mi></math>. The synthetic objective of the paper is the sum of four terms, from degree 2 to degree 4:</p>
+        <p>Portfolio risk that accounts for skewness and kurtosis is a polynomial of degree four in the weights <math><mi>x</mi></math>. The synthetic objective of the paper is</p>
+        <div class="eq">
+          <math display="block">
+            <mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>=</mo>
+            <msup><mi>x</mi><mi>&#x22A4;</mi></msup><mi>&#x3A3;</mi><mi>x</mi>
+            <mo>+</mo>
+            <munder><mo>&#x2211;</mo><mi>i</mi></munder><msub><mi>&#x3B7;</mi><mi>i</mi></msub><msubsup><mi>x</mi><mi>i</mi><mn>3</mn></msubsup>
+            <mo>+</mo>
+            <mrow class="hl"><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></munder><msub><mi>&#x3BA;</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msubsup><mi>x</mi><mi>i</mi><mn>2</mn></msubsup><msubsup><mi>x</mi><mi>j</mi><mn>2</mn></msubsup></mrow>
+            <mo>+</mo><mtext>concentration terms</mtext>
+          </math>
+        </div>
+        <p>Term by term:</p>
         <div class="model" role="table" aria-label="The four terms of the objective">
           <div class="mrow head" role="row"><span role="columnheader">Term</span><span role="columnheader">Role</span><span role="columnheader">Degree</span></div>
           <div class="mrow" role="row">
@@ -66,7 +79,7 @@
             <span role="cell">stylised penalty on concentrated positions</span><span role="cell">4</span>
           </div>
         </div>
-        <p class="meta">These four terms add up to the risk <math><mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo></math> to minimise, over long-only portfolios whose total weight is between 0.95 and 1.</p>
+        <p class="meta">The risk <math><mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo></math> is minimised over long-only portfolios whose total weight is between 0.95 and 1.</p>
         <div class="zoom">
           <p class="zoom-title">Zoom on the kurtosis-like term</p>
           <math display="block"><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></munder><msub><mi>&#x3BA;</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msubsup><mi>x</mi><mi>i</mi><mn>2</mn></msubsup><msubsup><mi>x</mi><mi>j</mi><mn>2</mn></msubsup></math>
