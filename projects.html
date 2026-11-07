@@ -10,7 +10,7 @@
   <meta property="og:description" content="Projects of Raphaël Padiou: polynomial portfolio optimization with the Lasserre hierarchy.">
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/stix-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="assets/css/style.css?v=9">
+  <link rel="stylesheet" href="assets/css/style.css?v=10">
 </head>
 <body>
 <div class="layout">
@@ -46,9 +46,10 @@
           <p class="pdesc">Portfolio optimization under a degree-4 polynomial risk measure via sums of squares and the Lasserre hierarchy (SDP).</p>
           <p class="pnote">An exploratory project. On real data the method does not beat the standard baselines (equal weights, minimum variance, HRP). I checked this as carefully as I could and report the limits as they are.</p>
           <p class="plinks"><a href="assets/papers/sos-portfolio.pdf">[Paper]</a> <a href="https://github.com/rpadiou/sos-portfolio">[Code]</a></p>
-          <figure class="pfig">
+          <figure class="pfig hoverable" tabindex="0">
             <img src="assets/img/sos-exp-a.png" width="1536" height="512" alt="Probability that the best of K local starts reaches the certified value, for K from 1 to 100, three synthetic regimes and 2 to 50 assets">
-            <figcaption>Local search misses the certified global minimum more often as the number of assets grows (synthetic instances).</figcaption>
+            <div class="lens"><img src="assets/img/sos-exp-a.png" alt="" aria-hidden="true" loading="lazy"><p><strong>What is shown.</strong> One panel per synthetic regime (“calibrated” is the default regime; nothing is calibrated to data). One curve per number of assets n. Horizontal axis: number K of local starts. Vertical axis: fraction of instances where the best of K starts reaches the certified value.</p></div>
+            <figcaption>Local search misses the certified global minimum more often as the number of assets grows (synthetic instances). <span class="hint">Hover or tap the figure to enlarge it.</span></figcaption>
           </figure>
         </div>
         <details class="more">
@@ -95,18 +96,21 @@
         </div>
 
         <h4>Results</h4>
+        <p class="meta">Hover over a figure, or tap it, to enlarge it and see what it shows.</p>
         <figure class="textonly">
-          <figcaption><strong>Local search misses the global minimum, more so with more assets.</strong> <span class="what">Preview figure above. One panel per synthetic regime (“calibrated” is the default regime; nothing is calibrated to data). One curve per number of assets n. Horizontal axis: number K of local starts. Vertical axis: fraction of instances where the best of K starts reaches the certified value.</span> In the default regime, a single local start misses the global minimum with probability 0.30 at n = 15 and 0.83 at n = 50 (averaged over the 100 starts of each instance; the first start alone misses in 32% and 86% of instances, which is what the K = 1 point shows). The relaxation certifies all but 29 of the 1760 instances, and only 74% of the default-regime instances at n = 50. <em>Caveats:</em> the comparator is SLSQP from random starts, not a global solver; the polynomials are synthetic; “certified” means to solver accuracy.</figcaption>
+          <figcaption><strong>Local search misses the global minimum, more so with more assets.</strong> In the default regime, a single local start misses the global minimum with probability 0.30 at n = 15 and 0.83 at n = 50 (averaged over the 100 starts of each instance; the first start alone misses in 32% and 86% of instances, which is what the K = 1 point shows). The relaxation certifies all but 29 of the 1760 instances, and only 74% of the default-regime instances at n = 50. <em>Caveats:</em> the comparator is SLSQP from random starts, not a global solver; the polynomials are synthetic; “certified” means to solver accuracy.</figcaption>
         </figure>
 
-        <figure>
+        <figure class="hoverable" tabindex="0">
           <img src="assets/img/sos-exp-b.png" width="1950" height="450" loading="lazy" alt="Mean true regret as a function of the ball radius delta for four noise levels, compared with the nominal problem and the best shrinkage">
-          <figcaption><strong>The robust formulation does not help.</strong> <span class="what">Mean true regret (lower is better) against the radius δ of the ball, for four noise levels ρ on the coefficients. Blue: robust formulation. Dashed: nominal problem. Dotted: best shrinkage. Shown: n = 10 assets, mixed market; the paper has other configurations.</span> A Frobenius ball around the kurtosis estimate does not beat the nominal problem, except marginally at the largest noise level. Shrinkage does better from ρ = 0.1 upward, but not at ρ = 0.05, where the nominal problem is best. <em>Caveats:</em> the estimation error is drawn, not real; this says nothing about other uncertainty models. Why shrinkage wins was not tested.</figcaption>
+            <div class="lens"><img src="assets/img/sos-exp-b.png" alt="" aria-hidden="true" loading="lazy"><p><strong>What is shown.</strong> Mean true regret (lower is better) against the radius δ of the ball, for four noise levels ρ on the coefficients. Blue: robust formulation. Dashed: nominal problem. Dotted: best shrinkage. Shown: n = 10 assets, mixed market; the paper has other configurations.</p></div>
+          <figcaption><strong>The robust formulation does not help.</strong> A Frobenius ball around the kurtosis estimate does not beat the nominal problem, except marginally at the largest noise level. Shrinkage does better from ρ = 0.1 upward, but not at ρ = 0.05, where the nominal problem is best. <em>Caveats:</em> the estimation error is drawn, not real; this says nothing about other uncertainty models. Why shrinkage wins was not tested.</figcaption>
         </figure>
 
-        <figure>
+        <figure class="hoverable" tabindex="0">
           <img src="assets/img/sos-exp-c.png" width="1650" height="510" loading="lazy" alt="Cumulative net log-returns of equal weights, minimum variance, HRP and polynomial strategies on 10 and 37 stocks">
-          <figcaption><strong>On real data, no gain.</strong> <span class="what">Cumulative log-return net of 5 bp costs, 2015–2025, on 10 stocks (left) and 37 stocks (right). EW: equal weights. MinVar_LW: Ledoit–Wolf minimum variance. HRP: hierarchical risk parity. Poly: the polynomial objective, minimised locally or by SOS (w4 = weight of the quartic term; on 37 stocks, a sector variant that keeps only intra-sector co-moments).</span> The certified minimiser lowers volatility and CVaR relative to equal weights, as any risk-minimising rule does. It is not better than Ledoit–Wolf minimum variance or minimum CVaR on those measures, and no net-return difference is distinguishable from zero. <em>Caveats:</em> the objective has no return term; one period, one universe, no correction for multiple testing, survivorship bias. That estimation error hides the benefit is a hypothesis, not a measurement.</figcaption>
+            <div class="lens"><img src="assets/img/sos-exp-c.png" alt="" aria-hidden="true" loading="lazy"><p><strong>What is shown.</strong> Cumulative log-return net of 5 bp costs, 2015–2025, on 10 stocks (left) and 37 stocks (right). EW: equal weights. MinVar_LW: Ledoit–Wolf minimum variance. HRP: hierarchical risk parity. Poly: the polynomial objective, minimised locally or by SOS (w4 = weight of the quartic term; on 37 stocks, a sector variant that keeps only intra-sector co-moments).</p></div>
+          <figcaption><strong>On real data, no gain.</strong> The certified minimiser lowers volatility and CVaR relative to equal weights, as any risk-minimising rule does. It is not better than Ledoit–Wolf minimum variance or minimum CVaR on those measures, and no net-return difference is distinguishable from zero. <em>Caveats:</em> the objective has no return term; one period, one universe, no correction for multiple testing, survivorship bias. That estimation error hides the benefit is a hypothesis, not a measurement.</figcaption>
         </figure>
 
         <h4>Authorship</h4>
