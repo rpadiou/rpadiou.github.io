@@ -90,7 +90,7 @@ main { max-width: 740px; margin: 0 auto; padding: 4rem 2rem 4rem 2.5rem; }
   padding: 3rem 1.6rem 2rem; color: #fff; text-align: center;
   background:
     linear-gradient(180deg, rgba(2,8,24,.25) 0%, rgba(2,8,24,.4) 50%, rgba(2,8,24,.1) 100%),
-    #050b1a url("../img/sidebar.jpg") center / cover no-repeat;
+    #050b1a url("../img/fusee.jpg") center / cover no-repeat;
 }
 .sidebar h1 { font-size: 1.55rem; font-weight: 600; line-height: 1.2; margin: 0 0 .4rem; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
 .status { color: rgba(255,255,255,.88); font-size: .95rem; line-height: 1.45; margin: 0 0 1.6rem; text-shadow: 0 1px 5px rgba(0,0,0,.5); }
@@ -114,7 +114,7 @@ main { max-width: 740px; margin: 0 auto; padding: 4rem 2rem 4rem 2.5rem; }
 @media (max-width: 900px) {
   .layout { padding-left: 0; }
   .sidebar { position: static; width: auto; padding: 1.6rem 1rem 1.4rem; background:
-    linear-gradient(180deg, rgba(2,8,24,.45), rgba(2,8,24,.3)), #050b1a url("../img/sidebar.jpg") center 40% / cover no-repeat; }
+    linear-gradient(180deg, rgba(2,8,24,.45), rgba(2,8,24,.3)), #050b1a url("../img/fusee.jpg") center 40% / cover no-repeat; }
   .avatar { width: 92px; height: 92px; margin-bottom: .8rem; }
   .status { margin-bottom: 1rem; }
   .menu { display: flex; justify-content: center; flex-wrap: wrap; gap: 0 1.2rem; margin-bottom: 1rem; }
