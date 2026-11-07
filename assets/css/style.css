@@ -25,7 +25,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .menu { list-style: none; margin: 0; padding: 0; }
 .menu a { display: block; padding: .15rem 0; color: var(--muted); }
 .menu a:hover { color: var(--text); text-decoration: none; }
-.menu a.active { color: var(--accent); }
+.menu a[aria-current="page"] { color: var(--accent); }
 
 main { flex: 1; min-width: 0; max-width: 640px; padding: 4rem 1rem 4rem 1.5rem; }
 section { margin-bottom: 2.6rem; }
@@ -34,6 +34,11 @@ p { margin: 0 0 .5rem; }
 .keywords { margin: 0; padding: 0; list-style: none; }
 .keywords li { display: inline; }
 .keywords li + li::before { content: " · "; color: var(--muted); }
+.preview { display: block; position: relative; margin: 1rem 0 0; max-width: 520px; border: 1px solid var(--rule); box-shadow: 0 1px 6px rgba(0,0,0,.08); line-height: 0; }
+.preview.cv { max-width: 600px; }
+.preview img { width: 100%; height: auto; }
+.zone { position: absolute; background: rgba(31,78,140,.12); }
+.zone:hover, .zone:focus-visible { background: rgba(31,78,140,.28); outline: 0; }
 .links { font-size: .9rem; }
 .links a { margin-right: .5rem; }
 em, .mono { font-style: italic; }
