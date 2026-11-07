@@ -83,38 +83,38 @@ figure.textonly { margin-top: .6rem; }
 
 
 /* Layout: fixed sidebar with a background image, content on the right */
-.layout { padding-left: 300px; }
+.layout { padding-left: 360px; }
 main { max-width: 740px; margin: 0 auto; padding: 4rem 2rem 4rem 2.5rem; }
 .sidebar {
-  position: fixed; top: 0; left: 0; bottom: 0; width: 300px; overflow-y: auto;
+  position: fixed; top: 0; left: 0; bottom: 0; width: 360px; overflow-y: auto;
   padding: 3rem 1.6rem 2rem; color: #fff; text-align: center;
   background:
-    linear-gradient(180deg, rgba(4,14,34,.78) 0%, rgba(4,14,34,.55) 55%, rgba(4,14,34,.2) 100%),
-    #0b2545 url("../img/sidebar.jpg") center / cover no-repeat;
+    linear-gradient(180deg, rgba(5,25,60,.45) 0%, rgba(5,25,60,.42) 52%, rgba(5,25,60,.08) 100%),
+    #1d5fa8 url("../img/sidebar.jpg") center / cover no-repeat;
 }
 .sidebar h1 { font-size: 1.55rem; font-weight: 600; line-height: 1.2; margin: 0 0 .4rem; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
 .status { color: rgba(255,255,255,.88); font-size: .95rem; line-height: 1.45; margin: 0 0 1.6rem; text-shadow: 0 1px 5px rgba(0,0,0,.5); }
 .avatar { display: block; width: 132px; height: 132px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,.9); box-shadow: 0 2px 14px rgba(0,0,0,.45); margin: 0 auto 1.1rem; background: #fff; }
-.menu { list-style: none; margin: 0 0 1.6rem; padding: 0; text-shadow: 0 1px 5px rgba(0,0,0,.55); }
-.menu li + li { border-top: 1px solid rgba(255,255,255,.2); }
+.menu { list-style: none; margin: 0 0 1.6rem; padding: 0; text-shadow: 0 1px 6px rgba(0,20,60,.7); }
+.menu li + li { border-top: 1px solid rgba(255,255,255,.35); }
 .menu a { display: block; padding: .5rem 0; color: rgba(255,255,255,.9); }
-.menu a:hover { color: #fff; text-decoration: none; background: rgba(255,255,255,.08); }
+.menu a:hover { color: #fff; text-decoration: none; background: rgba(5,25,60,.25); }
 .menu a[aria-current="page"] { color: #fff; font-weight: 600; }
 .sidebar a:focus-visible, .sidebar button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
 .icons { display: flex; justify-content: center; gap: .9rem; position: relative; }
-.icons a, .icons button { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; padding: 0; border-radius: 50%; border: 1px solid rgba(255,255,255,.55); background: rgba(255,255,255,.08); color: #fff; cursor: pointer; transition: background .15s; }
-.icons a:hover, .icons button:hover, .icons .mail:focus-within button { background: rgba(255,255,255,.25); text-decoration: none; }
+.icons a, .icons button { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; padding: 0; border-radius: 50%; border: 1px solid rgba(255,255,255,.7); background: rgba(5,25,60,.4); color: #fff; cursor: pointer; transition: background .15s; }
+.icons a:hover, .icons button:hover, .icons .mail:focus-within button { background: rgba(5,25,60,.7); text-decoration: none; }
 .icons svg { width: 20px; height: 20px; fill: currentColor; }
 .mail { position: relative; display: inline-flex; }
 .pop { display: none; position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%); white-space: nowrap; background: #fff; color: #1a1a1a; font-size: .85rem; padding: .35rem .7rem; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,.35); z-index: 5; }
 .pop::before { content: ""; position: absolute; top: -5px; left: 50%; width: 10px; height: 10px; background: #fff; transform: translateX(-50%) rotate(45deg); }
 .mail:hover .pop, .mail:focus-within .pop { display: block; }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .layout { padding-left: 0; }
   .sidebar { position: static; width: auto; padding: 1.6rem 1rem 1.4rem; background:
-    linear-gradient(180deg, rgba(4,14,34,.7), rgba(4,14,34,.5)), #0b2545 url("../img/sidebar.jpg") center 40% / cover no-repeat; }
+    linear-gradient(180deg, rgba(5,25,60,.4), rgba(5,25,60,.25)), #1d5fa8 url("../img/sidebar.jpg") center 55% / cover no-repeat; }
   .avatar { width: 92px; height: 92px; margin-bottom: .8rem; }
   .status { margin-bottom: 1rem; }
   .menu { display: flex; justify-content: center; flex-wrap: wrap; gap: 0 1.2rem; margin-bottom: 1rem; }
