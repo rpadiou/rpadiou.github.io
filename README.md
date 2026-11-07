@@ -14,3 +14,6 @@ Static site: plain HTML and CSS, no build step. Hosted on GitHub Pages (`.nojeky
 ## Preview
     python3 -m http.server 8000
 and open http://localhost:8000.
+
+## Cache
+GitHub Pages serves CSS with a 10-minute cache. After changing `assets/css/style.css`, bump the `?v=` number in the `<link>` of the three pages so visitors get the new styles at once.
