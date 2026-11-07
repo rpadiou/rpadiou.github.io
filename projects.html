@@ -37,25 +37,29 @@
         <p>An exploratory project. The approach does not beat the usual baselines (equal weights, minimum variance, HRP), but I tried to be as honest and rigorous as I could in checking it: the figures below come with the caveats the paper itself states.</p>
 
         <h3>The model</h3>
-        <p>Portfolio risk that accounts for skewness and kurtosis is a polynomial of degree four in the weights <math><mi>x</mi></math>. The synthetic objective of the paper is</p>
-        <div class="eq">
-          <math display="block">
-            <mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>=</mo>
-            <msup><mi>x</mi><mi>&#x22A4;</mi></msup><mi>&#x3A3;</mi><mi>x</mi>
-            <mo>+</mo>
-            <munder><mo>&#x2211;</mo><mi>i</mi></munder><msub><mi>&#x3B7;</mi><mi>i</mi></msub><msubsup><mi>x</mi><mi>i</mi><mn>3</mn></msubsup>
-            <mo>+</mo>
-            <mrow class="hl"><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></munder><msub><mi>&#x3BA;</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msubsup><mi>x</mi><mi>i</mi><mn>2</mn></msubsup><msubsup><mi>x</mi><mi>j</mi><mn>2</mn></msubsup></mrow>
-            <mo>+</mo><mtext>concentration terms</mtext>
-          </math>
+        <p>Portfolio risk that accounts for skewness and kurtosis is a polynomial of degree four in the weights <math><mi>x</mi></math>. The synthetic objective of the paper is the sum of four terms, from degree 2 to degree 4:</p>
+        <div class="model" role="table" aria-label="The four terms of the objective">
+          <div class="mrow head" role="row"><span role="columnheader">Term</span><span role="columnheader">Role</span><span role="columnheader">Degree</span></div>
+          <div class="mrow" role="row">
+            <span role="cell"><math><msup><mi>x</mi><mi>&#x22A4;</mi></msup><mi>&#x3A3;</mi><mi>x</mi></math></span>
+            <span role="cell">variance</span><span role="cell">2</span>
+          </div>
+          <div class="mrow" role="row">
+            <span role="cell"><math><mo>+</mo><munder><mo>&#x2211;</mo><mi>i</mi></munder><msub><mi>&#x3B7;</mi><mi>i</mi></msub><msubsup><mi>x</mi><mi>i</mi><mn>3</mn></msubsup></math></span>
+            <span role="cell">skewness-like</span><span role="cell">3</span>
+          </div>
+          <div class="mrow key" role="row">
+            <span role="cell"><math><mo>+</mo><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></munder><msub><mi>&#x3BA;</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msubsup><mi>x</mi><mi>i</mi><mn>2</mn></msubsup><msubsup><mi>x</mi><mi>j</mi><mn>2</mn></msubsup></math></span>
+            <span role="cell"><strong>kurtosis-like</strong> (the one that matters here)</span><span role="cell">4</span>
+          </div>
+          <div class="mrow" role="row">
+            <span role="cell"><math><mo>+</mo><mtext>concentration terms</mtext></math></span>
+            <span role="cell">stylised penalty on concentrated positions</span><span role="cell">4</span>
+          </div>
         </div>
-        <ul class="terms">
-          <li><math><msup><mi>x</mi><mi>&#x22A4;</mi></msup><mi>&#x3A3;</mi><mi>x</mi></math>: variance (degree 2).</li>
-          <li><math><msub><mi>&#x3B7;</mi><mi>i</mi></msub><msubsup><mi>x</mi><mi>i</mi><mn>3</mn></msubsup></math>: plays the part of skewness (degree 3).</li>
-          <li><span class="hlt"><math><msub><mi>&#x3BA;</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msubsup><mi>x</mi><mi>i</mi><mn>2</mn></msubsup><msubsup><mi>x</mi><mi>j</mi><mn>2</mn></msubsup></math></span>: plays the part of kurtosis (degree 4).</li>
-        </ul>
+        <p class="meta">These four terms add up to the risk <math><mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo></math> to minimise over long-only portfolios.</p>
         <div class="zoom">
-          <p class="zoom-title">Zoom on the quartic term</p>
+          <p class="zoom-title">Zoom on the kurtosis-like term</p>
           <math display="block"><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow></munder><msub><mi>&#x3BA;</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msubsup><mi>x</mi><mi>i</mi><mn>2</mn></msubsup><msubsup><mi>x</mi><mi>j</mi><mn>2</mn></msubsup></math>
           <p>This is the term that makes the problem hard. It is quartic and in general not convex, so a local solver can stop at a local minimum. The Lasserre hierarchy replaces each monomial by a variable and solves a semidefinite program whose optimum is a lower bound on the global minimum. If a portfolio reaches that bound, it is certified optimal, to solver accuracy. The <math><msub><mi>&#x3BA;</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></math> are model parameters, not the fourth co-moment tensor of a portfolio.</p>
         </div>
