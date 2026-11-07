@@ -95,3 +95,4 @@ details[open] .t-closed { display: none; }
 details[open] .toggle::before { content: "▾ "; }
 .project summary:hover .toggle { text-decoration: underline; }
 figure.textonly { margin-top: .6rem; }
+.plinks { margin-bottom: .8rem; }
