@@ -39,6 +39,10 @@ p { margin: 0 0 .5rem; }
 .preview img { width: 100%; height: auto; }
 .zone { position: absolute; background: rgba(31,78,140,.12); }
 .zone:hover, .zone:focus-visible { background: rgba(31,78,140,.28); outline: 0; }
+figure { margin: 1.6rem 0 0; max-width: 600px; }
+figure img { width: 100%; height: auto; border: 1px solid var(--rule); }
+figcaption { font-size: .9rem; line-height: 1.5; color: var(--muted); margin-top: .4rem; }
+figcaption strong { color: var(--text); font-weight: 600; }
 .links { font-size: .9rem; }
 .links a { margin-right: .5rem; }
 em, .mono { font-style: italic; }
