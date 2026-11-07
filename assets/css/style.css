@@ -57,3 +57,15 @@ em, .mono { font-style: italic; }
   main { padding: 1.5rem 1rem 3rem; }
 }
 .meta { color: var(--muted); font-size: .9rem; line-height: 1.5; }
+
+article h3 { font-size: 1.05rem; font-weight: 600; margin: 1.8rem 0 .4rem; }
+math { font-size: 1.05em; }
+.eq { max-width: 600px; overflow-x: auto; padding: .4rem 0; }
+.hl { background: rgba(31,78,140,.12); border-radius: 3px; padding: 0 .15em; }
+.hlt { background: rgba(31,78,140,.12); border-radius: 3px; padding: 0 .3em; }
+.terms { margin: .3rem 0 1rem; padding-left: 1.2rem; font-size: .95rem; }
+.zoom { max-width: 600px; border-left: 3px solid var(--accent); padding: .2rem 0 .2rem 1rem; margin: 1rem 0; }
+.zoom math { font-size: 1.5em; }
+.zoom p { font-size: .95rem; }
+.zoom-title { font-variant: small-caps; letter-spacing: .04em; color: var(--muted); margin-bottom: 0 !important; }
+.what { font-style: italic; }
