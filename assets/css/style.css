@@ -44,7 +44,8 @@ em, .mono { font-style: italic; }
 
 article h3 { font-size: 1.05rem; font-weight: 600; margin: 1.8rem 0 .4rem; }
 math { font-size: 1.05em; }
-.eq { max-width: 600px; overflow-x: auto; padding: .4rem 0; }
+.eq { overflow-x: auto; padding: .4rem 0; white-space: nowrap; }
+@media (max-width: 500px) { .eq math { font-size: .85em; } }
 .hl { background: rgba(31,78,140,.12); border-radius: 3px; padding: 0 .15em; }
 .hlt { background: rgba(31,78,140,.12); border-radius: 3px; padding: 0 .3em; }
 .terms { margin: .3rem 0 1rem; padding-left: 1.2rem; font-size: .95rem; }
