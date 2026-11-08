@@ -163,6 +163,5 @@ main { max-width: 46.25rem; margin: 0 auto; padding: 4rem 2rem 4rem 2.5rem; }
 .exp figure { margin-top: .9rem; }
 @media (max-width: 500px) { .pv, .bar { padding-left: 1rem; padding-right: 1rem; } }
 
-.lens .lens-extra { margin-top: .9rem; padding: .7rem .9rem .8rem; background: rgba(31,78,140,.06); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; }
-.lens .lens-extra p { font-size: .88rem; color: var(--muted); margin-top: .5rem; }
-.lens .lens-extra .lens-label { margin-top: 0; font-size: .78rem; font-weight: 600; font-variant: small-caps; letter-spacing: .06em; color: var(--accent); }
+.lens .lens-extra { margin-top: .9rem; padding-top: .7rem; border-top: 1px solid var(--rule); }
+.lens .lens-extra p { font-size: .9rem; color: var(--muted); margin-top: .45rem; }
