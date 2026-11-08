@@ -149,13 +149,13 @@ main { max-width: 46.25rem; margin: 0 auto; padding: 4rem 2rem 4rem 2.5rem; }
 .lens img { display: block; width: 100%; height: auto; border: 0 !important; }
 .lens p { margin: .7rem 0 0; font-size: .95rem; line-height: 1.5; color: var(--text); font-style: normal; }
 .lens em { font-style: italic; }
-@media (hover: hover) { .hoverable:hover .lens { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); } }
+@media (hover: hover) { .hoverable:hover .lens { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); transition-delay: 1s; } }
 .hoverable:focus-visible .lens, .hoverable.open .lens { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 .hoverable.open .lens { pointer-events: auto; cursor: pointer; }
 .hoverable.open::after { content: ""; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 40; }
 @media (hover: none) { .lens::after { content: "Tap anywhere to close"; display: block; margin-top: .8rem; text-align: center; font-size: .8rem; color: var(--muted); } }
 @media (min-width: 901px) { .lens { left: calc(50vw + 11.25rem); width: min(56rem, calc(100vw - 22.5rem - 3rem)); } }
-@media (prefers-reduced-motion: reduce) { .lens { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .lens { transition-duration: 0s; } }
 
 .pv { margin: 0 !important; padding: 1.2rem 1.5rem 1.2rem; max-width: none !important; cursor: pointer; }
 .pv img { border-radius: 8px; }
