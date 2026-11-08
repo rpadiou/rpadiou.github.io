@@ -97,7 +97,7 @@ main { max-width: 46.25rem; margin: 0 auto; padding: 4rem 2rem 4rem 2.5rem; }
 
 @media (max-width: 900px) {
   .layout { padding-left: 0; }
-  .sidebar { position: static; width: auto; padding: 1.6rem 1rem 1.4rem; background:
+  .sidebar { position: static; overflow: visible; width: auto; padding: 1.6rem 1rem 1.4rem; background:
     linear-gradient(180deg, rgba(2,8,24,.45), rgba(2,8,24,.3)), #050b1a url("../img/fusee.jpg") center 40% / cover no-repeat; }
   .avatar { width: 5.75rem; height: 5.75rem; margin-bottom: .8rem; }
   .status { margin-bottom: 1rem; }
