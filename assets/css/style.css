@@ -147,7 +147,7 @@ main { max-width: 46.25rem; margin: 0 auto; padding: 4rem 2rem 4rem 2.5rem; }
 .hint { font-style: italic; }
 .lens { position: fixed; top: 50%; left: 50%; width: min(56rem, 94vw); max-height: 92vh; overflow: auto; transform: translate(-50%, -48%) scale(.97); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .18s ease, transform .18s ease, visibility .18s; background: #fff; border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 12px 48px rgba(0,0,0,.35); padding: .9rem 1rem 1rem; z-index: 50; cursor: default; }
 .lens img { display: block; width: 100%; height: auto; border: 0 !important; }
-.lens p { margin: .7rem 0 0; font-size: .9rem; line-height: 1.5; color: var(--text); font-style: normal; }
+.lens p { margin: .7rem 0 0; font-size: .95rem; line-height: 1.5; color: var(--text); font-style: normal; }
 .lens em { font-style: italic; }
 .hoverable:hover .lens, .hoverable:focus .lens, .hoverable:focus-within .lens { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 @media (min-width: 901px) { .lens { left: calc(50vw + 11.25rem); width: min(56rem, calc(100vw - 22.5rem - 3rem)); } }
@@ -162,3 +162,7 @@ main { max-width: 46.25rem; margin: 0 auto; padding: 4rem 2rem 4rem 2.5rem; }
 .exp .setup { font-size: .95rem; line-height: 1.55; margin: 0 0 .2rem; }
 .exp figure { margin-top: .9rem; }
 @media (max-width: 500px) { .pv, .bar { padding-left: 1rem; padding-right: 1rem; } }
+
+.lens .lens-extra { margin-top: .9rem; padding: .7rem .9rem .8rem; background: rgba(31,78,140,.06); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; }
+.lens .lens-extra p { font-size: .88rem; color: var(--muted); margin-top: .5rem; }
+.lens .lens-extra .lens-label { margin-top: 0; font-size: .78rem; font-weight: 600; font-variant: small-caps; letter-spacing: .06em; color: var(--accent); }
