@@ -9,7 +9,7 @@ Static site: plain HTML and CSS, no build step. Hosted on GitHub Pages (`.nojeky
       pdftoppm -jpeg -r 130 -f 1 -l 1 -singlefile assets/cv.pdf assets/img/cv-preview
   (zone positions are percentages of the page; `PyMuPDF`'s `page.get_links()` lists the link rectangles).
 - Colors and font are at the top of `assets/css/style.css`. The font (STIX Two Text, OFL) is self-hosted in `assets/fonts/`: no external request.
-- One small script (`assets/js/figures.js`, only used on `projects.html`) lets touch screens open and close the enlarged figures; there is no other JavaScript.
+- One small script (`assets/js/figures.js`, only used on `projects.html`) opens and closes the enlarged figures (click, tap or Enter to open; Escape, the close button or a click outside to close); there is no other JavaScript.
 
 ## Preview
     python3 -m http.server 8000
