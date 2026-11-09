@@ -265,27 +265,47 @@ def page_figure(r, path, theme):
     plt.imsave(str(path).replace(".png", "-right.png"), img[:, cut:])
 
 
-def uniform_figure(path, eta=0.2, T=600):
+def uniform_figure(path, eta=0.2, T=80):
+    """Zoom on the learning phase against a fixed opponent (0.5, 0.3, 0.2): strategy and payoff per round."""
     th = THEMES["light"]
     plt.rcParams["font.family"] = "DejaVu Sans"
-    cum, bf = vs_fixed_opponent(eta, T)
+    g = A @ OPP
+    x = NASH.copy(); P = np.zeros((T + 1, 3)); pay = np.zeros(T + 1)
+    for t in range(T + 1):
+        P[t] = x; pay[t] = x @ g
+        x = x * np.exp(eta * g); x /= x.sum()
     t = np.arange(T + 1)
-    fig, ax = plt.subplots(figsize=(7.2, 4.2), dpi=160, facecolor=th["bg"])
-    ax.plot(t, bf[:, 2] * 0 + bf.max(1), color=th["grey"], lw=1.8, ls=(0, (4, 3)))
-    ax.plot(t, 0 * t, color=th["fg"], lw=3)
-    ax.plot(t, cum, color=RED, lw=3.4)
-    for s_ in ("top", "right"):
-        ax.spines[s_].set_visible(False)
-    for s_ in ("left", "bottom"):
-        ax.spines[s_].set_color(th["faint"])
-    ax.tick_params(colors=th["grey"], labelsize=13)
-    ax.set_xlabel("round", color=th["grey"], fontsize=14); ax.set_ylabel("total points won", color=th["grey"], fontsize=14)
-    ax.set_xlim(0, T * 1.02); ax.set_ylim(-14, bf.max() * 1.1)
-    ax.text(T * .40, cum[int(T * .40)] - 12, "MWU: learns to play paper", color=RED, fontsize=15, fontweight="bold", ha="left", va="top")
-    ax.text(T * .25, 12, "uniform play: exactly 0, always", color=th["fg"], fontsize=15, fontweight="bold", va="bottom")
-    ax.text(T * .02, bf.max(1)[T] * 1.01, "best single move in hindsight", color=th["grey"], fontsize=13, va="bottom")
-    ax.set_title("Against an opponent who favours rock", loc="left", color=th["fg"], fontsize=15, fontweight="bold", pad=10)
-    fig.tight_layout(); fig.savefig(path, facecolor=th["bg"]); plt.close(fig)
+    best = g.max()
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.4), dpi=160, facecolor=th["bg"], gridspec_kw={"wspace": .28})
+    for ax in (a1, a2):
+        ax.set_facecolor(th["bg"])
+        for s_ in ("top", "right"):
+            ax.spines[s_].set_visible(False)
+        for s_ in ("left", "bottom"):
+            ax.spines[s_].set_color(th["faint"])
+        ax.tick_params(colors=th["grey"], labelsize=13)
+        ax.set_xlabel("round", color=th["grey"], fontsize=14); ax.set_xlim(0, T * 1.18)
+    cols = [th["grey"], RED, th["faint"]]
+    names = ["rock", "paper", "scissors"]
+    for k in (0, 2, 1):
+        a1.plot(t, P[:, k], color=cols[k], lw=3.6 if k == 1 else 2.4)
+    a1.axhline(1 / 3, color=th["faint"], lw=1.2, ls=(0, (4, 3)))
+    a1.text(T * 1.02, P[-1, 1], "paper", color=RED, fontsize=15, fontweight="bold", va="center")
+    a1.text(T * 1.02, .105, "rock", color=th["grey"], fontsize=14, va="center")
+    a1.text(T * 1.02, .03, "scissors", color=th["grey"], fontsize=14, va="center")
+    a1.text(T * .02, 1 / 3 + .02, "start: 1/3 each", color=th["grey"], fontsize=12, va="bottom")
+    a1.set_ylim(0, 1.02); a1.set_ylabel("probability of each move", color=th["grey"], fontsize=14)
+    a1.set_title("MWU shifts to paper", loc="left", color=th["fg"], fontsize=16, fontweight="bold", pad=10)
+    a2.plot(t, 0 * t, color=th["fg"], lw=3)
+    a2.axhline(best, color=th["grey"], lw=1.8, ls=(0, (4, 3)))
+    a2.plot(t, pay, color=RED, lw=3.6)
+    a2.text(T * .02, best + .012, "best single move (paper): 0.3", color=th["grey"], fontsize=13, va="bottom")
+    a2.text(T * .45, pay[int(T * .45)] - .05, "MWU", color=RED, fontsize=15, fontweight="bold", va="top")
+    a2.text(T * .30, .015, "uniform play: 0", color=th["fg"], fontsize=15, fontweight="bold", va="bottom")
+    a2.set_ylim(-.04, best * 1.2); a2.set_ylabel("average points per round", color=th["grey"], fontsize=14)
+    a2.set_title("and earns more than uniform play", loc="left", color=th["fg"], fontsize=16, fontweight="bold", pad=10)
+    fig.subplots_adjust(left=.07, right=.97, bottom=.17, top=.86)
+    fig.savefig(path, facecolor=th["bg"]); plt.close(fig)
 
 
 if __name__ == "__main__":
