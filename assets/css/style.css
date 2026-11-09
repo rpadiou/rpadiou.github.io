@@ -240,3 +240,5 @@ html.lens-open { overflow: hidden; }
 .sk [id] { scroll-margin-top: 1rem; }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+.sk ol.sk-steps { margin: .2rem 0 1rem; padding-left: 1.4rem; }
+.sk ol.sk-steps li { margin-bottom: .5rem; }
