@@ -196,29 +196,33 @@ def tweet(r, path):
 def page_figure(r, path, theme):
     th = THEMES[theme]
     plt.rcParams["font.family"] = "DejaVu Sans"
-    fig = plt.figure(figsize=(11, 5), dpi=160, facecolor=th["bg"])
-    ax = fig.add_axes([.01, .02, .46, .94], facecolor=th["bg"])
+    fig = plt.figure(figsize=(11, 6), dpi=160, facecolor=th["bg"])
+    ax = fig.add_axes([.0, .02, .5, .94], facecolor=th["bg"])
     m, a, o, c = draw_simplex(ax, th, r, 19, 2.6)
     ax.set_xlim(-.3, 1.3); ax.set_ylim(-.14, 1.0)
-    ax2 = fig.add_axes([.57, .17, .41, .70], facecolor=th["bg"])
     t = np.arange(len(m))
-    D = {}
-    for k, (P, Q, col) in dict(mwu=(r["Xm"], r["Ym"], RED), avg=(r["Xa"], r["Ya"], BLUE), omwu=(r["Xo"], r["Yo"], GREEN)).items():
-        D[k] = kl_nash(P) + kl_nash(Q)
-        ax2.plot(t, D[k], color=col, lw=2.6)
-    ax2.set_yscale("log"); ax2.set_ylim(1e-4, 3e1)
-    for s_ in ("top", "right"):
-        ax2.spines[s_].set_visible(False)
-    for s_ in ("left", "bottom"):
-        ax2.spines[s_].set_color(th["faint"])
-    ax2.tick_params(colors=th["grey"], labelsize=14)
-    ax2.set_xlabel("iteration t", color=th["grey"], fontsize=15)
-    ax2.set_title("Distance to Nash (KL, both players)", loc="left", color=th["fg"], fontsize=15, pad=12)
-    n = len(t) - 1
-    kw = dict(fontsize=17, fontweight="bold", ha="left", va="bottom")
-    ax2.text(.55 * n, D["mwu"][int(.55 * n)] * 1.5, "MWU", color=RED, **kw)
-    ax2.text(.5 * n, D["omwu"][int(.5 * n)] * 1.7, "optimistic MWU", color=GREEN, **kw)
-    ax2.text(.3 * n, D["avg"][int(.3 * n)] * .1, "average of MWU", color=BLUE, **{**kw, "va": "top"})
+    rows = (("MWU: swings wider and wider", r["Xm"], RED),
+            ("Its average: settles at 1/3", r["Xa"], BLUE),
+            ("Optimistic MWU: settles at 1/3", r["Xo"], GREEN))
+    for k, (title, X, col) in enumerate(rows):
+        h = .20
+        axk = fig.add_axes([.58, .66 - k * .28, .40, h], facecolor=th["bg"])
+        axk.axhline(1 / 3, color=th["fg"], lw=1.2, ls=(0, (4, 3)), zorder=1)
+        for i, (al, ls_) in enumerate(((1.0, "-"), (.65, "-"), (.4, "-"))):
+            axk.plot(t, X[:, i], color=col, lw=2.2, alpha=al, ls=ls_, zorder=3)
+        axk.set_ylim(-.02, 1.02); axk.set_xlim(0, t[-1])
+        axk.set_yticks([0, 1 / 3, 1]); axk.set_yticklabels(["0", "1/3", "1"])
+        for s_ in ("top", "right"):
+            axk.spines[s_].set_visible(False)
+        for s_ in ("left", "bottom"):
+            axk.spines[s_].set_color(th["faint"])
+        axk.tick_params(colors=th["grey"], labelsize=13)
+        if k < 2:
+            axk.set_xticklabels([])
+        else:
+            axk.set_xlabel("iteration t", color=th["grey"], fontsize=14)
+        axk.set_title(title, loc="left", color=col, fontsize=16, fontweight="bold", pad=6)
+    fig.text(.58, .985, "Probability of each move (player 1)", color=th["grey"], fontsize=13, va="top")
     fig.savefig(path, facecolor=th["bg"])
     plt.close(fig)
 
