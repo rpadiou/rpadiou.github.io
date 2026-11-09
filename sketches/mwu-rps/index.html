@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
   <title>Multiplicative Weights in Rock-Paper-Scissors · Raphaël Padiou</title>
   <meta name="description" content="Two players learning rock-paper-scissors by multiplicative weights: the last iterate cycles away from Nash, the average converges, optimistic updates converge.">
   <meta property="og:type" content="website">
@@ -43,16 +42,20 @@
       <h2 class="sk-title">Never settling, yet always fair: Multiplicative Weights in Rock-Paper-Scissors</h2>
 
       <div class="sk-body">
-        <p>Two players play rock-paper-scissors against each other, and each learns with Multiplicative Weights (Hedge): after every round, the weight of each action is multiplied by <span class="mono">exp(η · payoff)</span> against the opponent's current mixed strategy, then renormalised. The only Nash equilibrium is to play every action with probability 1/3. Do the players get there?</p>
-        <p><span class="c-red">Plain MWU does not.</span> The strategy spirals away from the centre, towards the edge of the triangle: the KL divergence to Nash grows at every step (Bailey &amp; Piliouras, 2018). In the run below it goes from 0.63 to 5.0 in 400 rounds, and one player ends up playing scissors 94% of the time. <span class="c-blue">The average does.</span> Each player's regret grows like √T, so the <em>time-averaged</em> strategies form an approximate equilibrium whose error shrinks like 1/√T: in our run it is within 0.03 of (1/3, 1/3, 1/3) after 400 rounds.</p>
-        <p><span class="c-green">Optimistic MWU does too, and without averaging.</span> Counting the latest payoff twice, with the update <span class="mono">2g<sub>t</sub> − g<sub>t−1</sub></span>, makes the strategy itself converge to Nash for a small enough step size (Daskalakis &amp; Panageas, 2019): here the KL divergence falls from 0.63 to 0.003.</p>
+        <div class="sk-intro">
+          <p class="sk-h2">The setting, in plain words</p>
+          <p>Think of rock-paper-scissors. If you always play rock, I will soon notice and play paper. The only way not to be beaten is to <em>mix</em> your moves unpredictably, one third each. Then nothing I do can give me an edge. Such a pair of strategies, where neither player gains by changing their own on their own, is called a <strong>Nash equilibrium</strong>. Here it is unique: both players play (1/3, 1/3, 1/3).</p>
+          <p>Why care? Because more and more decisions are made by algorithms that <em>learn</em> by playing against each other: pricing bots, bidders in ad auctions, trading agents, the two networks of a GAN. When everybody keeps adapting to everybody, does the behaviour calm down at the equilibrium, go round in circles, or blow up? Rock-paper-scissors is the smallest example where the answer is not obvious.</p>
+          <p>The learning rule studied here, <strong>Multiplicative Weights (MWU, also called Hedge)</strong>, is one of the simplest: keep a weight for each move, and after every round boost the moves that would have done well against what the opponent just did. A move's <em>payoff</em> is the score it would have earned (+1 for a win, 0 for a draw, −1 for a loss, averaged over the opponent's current mix). The boost is a multiplication by <span class="mono">exp(η · payoff)</span>: a good move gets more weight, a bad one less, weights stay positive, and the effect compounds from round to round. The number η, the learning rate, says how strongly to react. Finally the weights are rescaled to sum to 1, so they read as probabilities.</p>
+        </div>
+
+        <p>Do two MWU players end up at Nash?</p>
+        <p><span class="c-red">Plain MWU does not.</span> The strategy spirals away from the centre, towards the edge of the triangle: the KL divergence to Nash (a measure of distance between two probability vectors) grows at every step (Bailey &amp; Piliouras, 2018). In the run below it goes from 0.63 to 5.0 in 400 rounds, and one player ends up playing scissors 94% of the time. <span class="c-blue">The average does.</span> Each player's regret (how much they lose compared with the best fixed move in hindsight) grows slowly, so the <em>time-averaged</em> strategies form an approximate equilibrium, with a guaranteed error of order η + 1/(ηT): in our run it is within 0.03 of (1/3, 1/3, 1/3) after 400 rounds.</p>
+        <p><span class="c-green">Optimistic MWU does too, and without averaging.</span> Counting the latest payoff twice, with the update <span class="mono">2g<sub>t</sub> − g<sub>t−1</sub></span> (where g<sub>t</sub> is the payoff vector at round t), makes the strategy itself converge to Nash for a small enough step size (Daskalakis &amp; Panageas, 2019): here the KL divergence falls from 0.63 to 0.003.</p>
       </div>
 
       <figure>
-        <picture>
-          <source srcset="figure-dark.png" media="(prefers-color-scheme: dark)">
-          <img src="figure-light.png" width="1760" height="800" alt="Left: the rock-paper-scissors simplex with the trajectory of one player under MWU (spiralling to the edge), its running average and optimistic MWU (both converging to the centre). Right: KL divergence to Nash over 400 iterations, growing for MWU, decreasing for optimistic MWU, small for the average.">
-        </picture>
+        <img src="figure.png" width="1760" height="800" alt="Left: the rock-paper-scissors simplex with the trajectory of one player under MWU (spiralling to the edge), its running average and optimistic MWU (both converging to the centre). Right: KL divergence to Nash over 400 iterations, growing for MWU, decreasing for optimistic MWU, small for the average.">
         <figcaption>One run, step size η = 0.2, 400 rounds, both players start away from the centre. Left: player 1's strategy. Right: KL divergence to Nash, summed over both players (log scale). The average is not monotone: it wiggles around Nash.</figcaption>
       </figure>
 
@@ -78,6 +81,6 @@
   </main>
 
 </div>
-<script src="anim.js?v=1"></script>
+<script src="anim.js?v=3"></script>
 </body>
 </html>

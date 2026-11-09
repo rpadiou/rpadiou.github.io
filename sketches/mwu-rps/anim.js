@@ -75,28 +75,47 @@
     ctx.textAlign = "center"; ctx.fillText("Rock", P([1, 0, 0])[0], P([1, 0, 0])[1] - 12);
     ctx.textAlign = "center"; ctx.fillText("Paper", P([0, 1, 0])[0], P([0, 1, 0])[1] + fs + 4);
     ctx.textAlign = "center"; ctx.fillText("Scissors", P([0, 0, 1])[0], P([0, 0, 1])[1] + fs + 4);
+    var c0 = P([1 / 3, 1 / 3, 1 / 3]);
     // paths
     function trail(path, color, lw) {
-      ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.beginPath();
-      for (var j = 0; j <= upto; j++) { var q = P(path[j]); j ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }
-      ctx.stroke();
+      // older part faint, recent part vivid: draw in chunks of increasing opacity
+      var chunks = 24, len = upto + 1, size = Math.max(2, Math.ceil(len / chunks));
+      ctx.strokeStyle = color; ctx.lineWidth = lw;
+      for (var a0 = 0; a0 < upto; a0 += size) {
+        var a1 = Math.min(upto, a0 + size);
+        ctx.globalAlpha = 0.25 + 0.75 * (a1 / Math.max(1, upto));
+        ctx.beginPath();
+        for (var j = a0; j <= a1; j++) { var q = P(path[j]); j > a0 ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); }
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
     }
-    trail(data.M, red, 2.2); trail(data.O, green, 2.2); trail(data.A, blue, 2.6);
+    // soft tint towards the edge (distance to Nash), then trails
+    var g = ctx.createRadialGradient(c0[0], c0[1], 0, c0[0], c0[1], side * 0.62);
+    g.addColorStop(0, "rgba(196,214,245,0)"); g.addColorStop(1, "rgba(196,214,245,.55)");
+    ctx.save(); ctx.beginPath();
+    for (var m2 = 0; m2 < 3; m2++) { var vq = P([[1, 0, 0], [0, 1, 0], [0, 0, 1]][m2]); m2 ? ctx.lineTo(vq[0], vq[1]) : ctx.moveTo(vq[0], vq[1]); }
+    ctx.closePath(); ctx.clip(); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h); ctx.restore();
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = red; trail(data.M, red, 2.4);
+    ctx.shadowColor = green; trail(data.O, green, 2.4);
+    ctx.shadowColor = blue; trail(data.A, blue, 2.8);
+    ctx.shadowBlur = 0;
     // Nash and start
     var c = P([1 / 3, 1 / 3, 1 / 3]);
-    ctx.fillStyle = bg; ctx.strokeStyle = fg; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(c[0], c[1], 5, 0, 6.2832); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#ffd23f"; ctx.strokeStyle = fg; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(c[0], c[1], 7, 0, 6.2832); ctx.fill(); ctx.stroke();
     var s0 = P(X0); ctx.fillStyle = grey; ctx.beginPath(); ctx.arc(s0[0], s0[1], 3.5, 0, 6.2832); ctx.fill();
     // direct labels at the current points
     ctx.font = "600 " + fs + "px 'STIX Two Text', Georgia, serif";
     function tag(path, color, text, dx, dy, align) {
       var q = P(path[upto]);
-      ctx.fillStyle = color; ctx.beginPath(); ctx.arc(q[0], q[1], 4, 0, 6.2832); ctx.fill();
+      ctx.shadowBlur = 12; ctx.shadowColor = color; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(q[0], q[1], 5, 0, 6.2832); ctx.fill(); ctx.shadowBlur = 0;
       if (align === "left" && q[0] > w * 0.7) { align = "right"; dx = -dx; }
       ctx.textAlign = align; ctx.fillText(text, q[0] + dx, q[1] + dy);
     }
-    tag(data.M, red, "MWU", 9, -8, "left");
+    tag(data.M, red, "MWU", 9, -14, "left");
     tag(data.O, green, "optimistic MWU", -12, 24, "right");
-    tag(data.A, blue, "average", 12, 4, "left");
+    tag(data.A, blue, "average", 12, 18, "left");
   }
 
   function frame() {
@@ -116,7 +135,6 @@
   slider.addEventListener("input", start);
   replay.addEventListener("click", start);
   window.addEventListener("resize", function () { if (data) draw(k); });
-  if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { if (data) draw(k); });
   // Start when visible (saves work if the page is opened in the background).
   if ("IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) { io.disconnect(); start(); } }, { threshold: 0.3 });

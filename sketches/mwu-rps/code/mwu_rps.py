@@ -114,8 +114,7 @@ def verify(r):
 
 # ---------------------------------------------------------------------- drawing
 THEMES = {
-    "light": dict(bg="#ffffff", fg="#1a1a1a", grey="#8a8a8a", faint="#d9d9d9"),
-    "dark":  dict(bg="#14161a", fg="#ececec", grey="#8c8c8c", faint="#3a3d44"),
+    "light": dict(bg="#ffffff", fg="#111111", grey="#8a8a8a", faint="#d9d9d9", tint="#e6eefb"),
 }
 V = np.array([[0.5, np.sqrt(3) / 2], [0.0, 0.0], [1.0, 0.0]])  # rock (top), paper, scissors
 
@@ -124,20 +123,47 @@ def xy(P):
     return P @ V
 
 
+def fade_line(ax, P, color, lw, z, glow=True):
+    """Trail whose opacity ramps up along time (old = faint, recent = vivid), with a soft glow."""
+    from matplotlib.collections import LineCollection
+    seg = np.stack([P[:-1], P[1:]], axis=1)
+    alpha = np.linspace(0.3, 1.0, len(seg))
+    from matplotlib.colors import to_rgba
+    if glow:
+        for w, a_ in ((lw * 3.6, 0.10),):
+            rgba = np.array([to_rgba(color, a_) for _ in alpha]); rgba[:, 3] = alpha * a_
+            ax.add_collection(LineCollection(seg, colors=rgba, linewidths=w, capstyle="butt", zorder=z - .1))
+    rgba = np.array([to_rgba(color, a_) for a_ in alpha])
+    ax.add_collection(LineCollection(seg, colors=rgba, linewidths=lw, capstyle="butt", zorder=z))
+
+
 def draw_simplex(ax, th, r, fs, lw):
+    import matplotlib.tri as mtri
+    from matplotlib.colors import LinearSegmentedColormap
+    from matplotlib.patches import Polygon
     ax.set_aspect("equal"); ax.axis("off")
-    tri = np.vstack([V, V[:1]])
-    ax.plot(tri[:, 0], tri[:, 1], color=th["faint"], lw=lw * 1.2, solid_joinstyle="round", zorder=1)
-    ax.text(*V[0] + [0, .05], "Rock", ha="center", va="bottom", color=th["grey"], fontsize=fs)
-    ax.text(*V[1] + [-.02, -.03], "Paper", ha="right", va="top", color=th["grey"], fontsize=fs)
-    ax.text(*V[2] + [.02, -.03], "Scissors", ha="left", va="top", color=th["grey"], fontsize=fs)
+    # soft background: distance to Nash (KL), pale blue near the edge, white at the centre
+    n = 90
+    pts = np.array([(i / n, j / n, 1 - i / n - j / n) for i in range(n + 1) for j in range(n + 1 - i)])
+    pts = np.clip(pts, 1e-3, None); pts /= pts.sum(1, keepdims=True)
+    z = np.clip(kl_nash(pts), 0, 2.2)
+    P2 = xy(pts)
+    tri_ = mtri.Triangulation(P2[:, 0], P2[:, 1])
+    cm = LinearSegmentedColormap.from_list("t", ["#ffffff", "#eaf1fd", "#c4d6f5"])
+    ax.tricontourf(tri_, z, levels=np.linspace(0, 2.2, 12), cmap=cm, zorder=0)
+    outline = Polygon(V, closed=True, fill=False, ec=th["faint"], lw=lw * 1.0, joinstyle="round", zorder=1)
+    ax.add_patch(outline)
+    for v, (txt, off, ha, va) in zip(V, (("Rock", (0, .05), "center", "bottom"), ("Paper", (-.02, -.03), "right", "top"), ("Scissors", (.02, -.03), "left", "top"))):
+        ax.text(*(v + off), txt, ha=ha, va=va, color=th["grey"], fontsize=fs)
     m, a, o = xy(r["Xm"]), xy(r["Xa"]), xy(r["Xo"])
-    ax.plot(*m.T, color=RED, lw=lw, zorder=3, solid_capstyle="round")
-    ax.plot(*o.T, color=GREEN, lw=lw, zorder=4, solid_capstyle="round")
-    ax.plot(*a.T, color=BLUE, lw=lw * 1.3, zorder=5, solid_capstyle="round")
+    fade_line(ax, m, RED, lw, 3)
+    fade_line(ax, o, GREEN, lw, 4)
+    fade_line(ax, a, BLUE, lw * 1.25, 5)
+    for P_, col in ((m, RED),):          # bright heads
+        ax.plot(*P_[-1], "o", ms=fs * .5, color=col, mec="white", mew=1.5, zorder=8)
     c = xy(NASH[None])[0]
-    ax.plot(*c, marker="o", ms=fs * .55, mfc=th["bg"], mec=th["fg"], mew=lw * 1.1, zorder=6)
-    ax.plot(*m[0], marker="o", ms=fs * .4, color=th["grey"], zorder=6)
+    ax.plot(*c, marker="*", ms=fs * 1.1, mfc="#ffd23f", mec=th["fg"], mew=lw * .7, zorder=9)
+    ax.plot(*m[0], marker="o", ms=fs * .45, color=th["fg"], zorder=9)
     return m, a, o, c
 
 
@@ -203,6 +229,5 @@ if __name__ == "__main__":
     (HERE / "results.json").write_text(json.dumps(res, indent=2) + "\n")
     print(json.dumps(res, indent=2))
     tweet(r, OUT / "tweet.png")
-    for th in ("light", "dark"):
-        page_figure(r, OUT / f"figure-{th}.png", th)
+    page_figure(r, OUT / "figure.png", "light")
     print("wrote", OUT / "tweet.png")
