@@ -205,3 +205,9 @@ html.lens-open { overflow: hidden; }
 .sk .sk-intro { border-left: 3px solid var(--rule); padding-left: 1.1rem; margin: 0 0 2rem; }
 .sk .sk-intro p { color: var(--text); }
 .sk .sk-intro .sk-h2 { font-size: .9rem; font-weight: 600; font-variant: small-caps; letter-spacing: .05em; color: var(--muted); margin: 0 0 .5rem; }
+
+/* figure split in two, a caption under each half */
+.sk .fig-pair { display: grid; grid-template-columns: 54fr 46fr; gap: 1.4rem; margin: 2.6rem 0; align-items: start; }
+.sk .fig-pair figure { margin: 0; }
+.sk .fig-pair img { width: 100%; height: auto; }
+@media (max-width: 640px) { .sk .fig-pair { grid-template-columns: 1fr; gap: 1.8rem; } }

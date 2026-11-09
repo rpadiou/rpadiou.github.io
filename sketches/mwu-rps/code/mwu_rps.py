@@ -258,6 +258,11 @@ def page_figure(r, path, theme):
     fig.text(.58, .985, "Probability of each move (player 1)", color=th["grey"], fontsize=13, va="top")
     fig.savefig(path, facecolor=th["bg"])
     plt.close(fig)
+    # two halves, so the page can put one caption under each
+    img = plt.imread(path)
+    cut = int(img.shape[1] * .54)
+    plt.imsave(str(path).replace(".png", "-left.png"), img[:, :cut])
+    plt.imsave(str(path).replace(".png", "-right.png"), img[:, cut:])
 
 
 def uniform_figure(path, eta=0.2, T=600):
