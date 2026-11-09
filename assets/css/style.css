@@ -206,8 +206,17 @@ html.lens-open { overflow: hidden; }
 .sk .sk-intro p { color: var(--text); }
 .sk .sk-intro .sk-h2 { font-size: .9rem; font-weight: 600; font-variant: small-caps; letter-spacing: .05em; color: var(--muted); margin: 0 0 .5rem; }
 
-/* figure split in two, a caption under each half */
-.sk .fig-pair { display: grid; grid-template-columns: 54fr 46fr; gap: 1.4rem; margin: 2.6rem 0; align-items: start; }
-.sk .fig-pair figure { margin: 0; }
-.sk .fig-pair img { width: 100%; height: auto; }
-@media (max-width: 640px) { .sk .fig-pair { grid-template-columns: 1fr; gap: 1.8rem; } }
+
+
+
+
+/* animated figures: captions under each canvas, enlarge on click */
+.sk .anim-grid figure { margin: 0; }
+.sk .anim-grid canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sk .controls input[type=range] { width: 9rem; }
+.sk .controls output { min-width: 3rem; }
+.sk-zoom { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 60; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.sk-zoom-box { position: relative; background: #fff; border-radius: 12px; box-shadow: 0 12px 48px rgba(0,0,0,.35); padding: 1rem 1.2rem 1.1rem; width: min(52rem, 94vw); max-height: 94vh; overflow: auto; }
+.sk-zoom-box canvas { display: block; width: 100%; height: min(70vh, 48rem); aspect-ratio: auto; cursor: default; }
+.sk-zoom-box p { margin: .7rem 0 0; font-size: .95rem; line-height: 1.5; color: var(--muted); }
+.sk-zoom-x { position: absolute; top: .3rem; right: .6rem; border: 0; background: none; font-size: 1.8rem; line-height: 1; cursor: pointer; color: var(--muted); }

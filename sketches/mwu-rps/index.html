@@ -13,7 +13,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="../../assets/fonts/stix-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../../assets/css/style.css?v=24">
+  <link rel="stylesheet" href="../../assets/css/style.css?v=25">
 </head>
 <body class="sk">
 <div class="layout">
@@ -66,30 +66,26 @@
         <p><span class="c-green">Optimistic MWU does too, and without averaging.</span> Counting the latest payoff twice, with the update <span class="mono">2g<sub>t</sub> − g<sub>t−1</sub></span> (where g<sub>t</sub> is the payoff vector at round t), makes the strategy itself converge to Nash for a small enough step size (Daskalakis &amp; Panageas, 2019): here the KL divergence falls from 0.63 to 0.003.</p>
       </div>
 
-      <div class="fig-pair">
-        <figure>
-          <img src="figure-left.png" width="950" height="960" alt="The rock-paper-scissors simplex with the trajectory of one player under MWU (spiralling to the edge), its running average and optimistic MWU (both converging to the centre).">
-          <figcaption>One run, step size η = 0.2, 400 rounds, both players start away from the centre; player 1 is shown. Its strategy on the triangle (black dot: start, star: Nash).</figcaption>
-        </figure>
-        <figure>
-          <img src="figure-right.png" width="810" height="960" alt="Probability of each move over 400 rounds: swinging between 0 and 1 with growing amplitude for MWU, settling at 1/3 for the average and for optimistic MWU.">
-          <figcaption>The probability of each of the three moves over time; the dashed line is the Nash value 1/3. Under plain MWU the probabilities swing between 0 and 1 with growing amplitude; the average and optimistic MWU settle at 1/3.</figcaption>
-        </figure>
-      </div>
-
       <div class="sk-anim">
         <div class="anim-grid">
-          <canvas id="sim" width="640" height="672" role="img" aria-label="Animated trajectories of MWU, its average and optimistic MWU on the rock-paper-scissors simplex"></canvas>
-          <canvas id="probs" width="640" height="672" role="img" aria-label="Probability of each move over time for MWU, its average and optimistic MWU"></canvas>
+          <figure>
+            <canvas id="sim" width="640" height="672" role="img" aria-label="Trajectories of MWU, its average and optimistic MWU on the rock-paper-scissors simplex"></canvas>
+            <figcaption>Player 1's strategy on the triangle: plain MWU (orange) spirals out to the edge, its running average (blue) and optimistic MWU (green) go to the Nash star. Both players start away from the centre (grey dot).</figcaption>
+          </figure>
+          <figure>
+            <canvas id="probs" width="640" height="672" role="img" aria-label="Probability of each move over time for MWU, its average and optimistic MWU"></canvas>
+            <figcaption>The probability of each of the three moves over time (dashed: the Nash value 1/3). Under plain MWU the probabilities swing between 0 and 1 with growing amplitude; the average and optimistic MWU settle at 1/3.</figcaption>
+          </figure>
         </div>
         <div class="controls">
-          <label for="eta">Step size η <input id="eta" type="range" min="0.05" max="0.4" step="0.01" value="0.2"><output id="eta-out" for="eta">0.20</output></label>
-          <button id="replay" type="button">Replay</button>
+          <label for="eta">Step size η <input id="eta" type="range" min="0" max="100" step="0.1" value="76.6"><output id="eta-out" for="eta">0.2</output></label>
+          <label for="rounds">Rounds <input id="rounds" type="range" min="0" max="100" step="0.1" value="45.2"><output id="rounds-out" for="rounds">400</output></label>
+          <button id="replay" type="button">Play</button>
         </div>
       </div>
 
       <div class="sk-body">
-        <p class="sk-note">Left: player 1's strategy on the triangle. Right: the probability of each of its three moves over time (dashed: 1/3). The animation runs the same dynamics in your browser (same start as the figure). A small η gives a slow, wide spiral; a large η makes plain MWU hit the edge sooner. Optimistic MWU is only guaranteed to converge for η small enough: I checked η ≤ 0.2 numerically and did not check larger values.</p>
+        <p class="sk-note">Both sliders are logarithmic. The animation runs the same dynamics in your browser as the Python script (same start). A small η gives a slow, wide spiral, so give it more rounds; a large η makes plain MWU hit the edge sooner. Optimistic MWU is only guaranteed to converge for η small enough: in this run I checked numerically that it converges for every η up to 0.5, but the guarantee is only for small η. Click a figure to enlarge it.</p>
       </div>
 
       <h3 class="sk-h">References</h3>
@@ -106,6 +102,6 @@
   </main>
 
 </div>
-<script src="anim.js?v=4"></script>
+<script src="anim.js?v=5"></script>
 </body>
 </html>

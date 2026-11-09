@@ -5,15 +5,14 @@
   var A = [[0, -1, 1], [1, 0, -1], [-1, 1, 0]];
   var X0 = [0.634731506313261, 0.24247562209952123, 0.12279287158721759];
   var Y0 = [0.06211401342478154, 0.26564355107707865, 0.6722424354981398];
-  var TMAX = 80;                       // continuous-time horizon: steps = TMAX / eta
   var V = [[0.5, Math.sqrt(3) / 2], [0, 0], [1, 0]];   // rock (top), paper, scissors
 
   var canvas = document.getElementById("sim");
-  var slider = document.getElementById("eta"), out = document.getElementById("eta-out");
+  var etaSl = document.getElementById("eta"), etaOut = document.getElementById("eta-out");
+  var nSl = document.getElementById("rounds"), nOut = document.getElementById("rounds-out");
   var replay = document.getElementById("replay");
   if (!canvas || !canvas.getContext) return;
-  var ctx = canvas.getContext("2d");
-  var pcanvas = document.getElementById("probs"), pctx = pcanvas && pcanvas.getContext("2d");
+  var pcanvas = document.getElementById("probs");
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function mv(M, v, sign, transpose) {
@@ -27,8 +26,7 @@
     return [q[0] / s, q[1] / s, q[2] / s];
   }
   // All paths for a given eta (arrays of strategies of player 1).
-  function simulate(eta) {
-    var n = Math.round(TMAX / eta);
+  function simulate(eta, n) {
     var xm = X0, ym = Y0, xo = X0, yo = Y0;
     var gxo = mv(A, yo, 1, false), gyo = mv(A, xo, -1, true);
     var M = [xm], O = [xo], Av = [xm], sum = xm.slice();
@@ -52,7 +50,8 @@
     var v = getComputedStyle(canvas).getPropertyValue(name).trim();
     return v || fallback;
   }
-  function draw(upto) {
+  function draw(cv, upto) {
+    var canvas = cv, ctx = cv.getContext("2d");
     var dpr = window.devicePixelRatio || 1;
     var w = canvas.clientWidth, h = canvas.clientHeight;
     if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
@@ -115,15 +114,14 @@
       ctx.textAlign = align; ctx.fillText(text, q[0] + dx, q[1] + dy);
     }
     tag(data.M, red, "MWU", 9, -14, "left");
-    tag(data.O, green, "optimistic MWU", -12, 24, "right");
+    tag(data.O, green, "optimistic MWU", -14, 46, "right");
     tag(data.A, blue, "average", 12, 18, "left");
-    drawProbs(upto);
   }
 
 
   // Right-hand canvas: probability of each move over time, one row per method.
-  function drawProbs(upto) {
-    if (!pctx) return;
+  function drawProbs(cv, upto) {
+    var pcanvas = cv, pctx = cv.getContext("2d");
     var dpr = window.devicePixelRatio || 1, w = pcanvas.clientWidth, h = pcanvas.clientHeight;
     if (pcanvas.width !== Math.round(w * dpr) || pcanvas.height !== Math.round(h * dpr)) { pcanvas.width = Math.round(w * dpr); pcanvas.height = Math.round(h * dpr); }
     pctx.setTransform(dpr, 0, 0, dpr, 0, 0); pctx.clearRect(0, 0, w, h);
@@ -152,29 +150,66 @@
       pctx.globalAlpha = 1;
     }
     pctx.font = (fs - 2) + "px 'STIX Two Text', Georgia, serif"; pctx.fillStyle = grey; pctx.textAlign = "right";
-    pctx.fillText("time", w - right, h - 4);
+    pctx.fillText("round " + data.n, w - right, h - 4);
   }
 
+  // Log scales: eta from 0.01 to 0.5, rounds from 50 to 5000 (slider value 0..100), two significant digits.
+  function nice(x) { return parseFloat(x.toPrecision(2)); }
+  function etaOf(v) { return nice(0.01 * Math.pow(50, v / 100)); }
+  function roundsOf(v) { return Math.round(nice(50 * Math.pow(100, v / 100))); }
+
+  var zoom = null;                      // {cv, kind} while a figure is enlarged
+  function redraw(upto) {
+    draw(canvas, upto); drawProbs(pcanvas, upto);
+    if (zoom) (zoom.kind === "sim" ? draw : drawProbs)(zoom.cv, upto);
+  }
+  function compute() {
+    cancelAnimationFrame(raf); raf = 0;
+    var eta = etaOf(parseFloat(etaSl.value)), n = roundsOf(parseFloat(nSl.value));
+    etaOut.textContent = eta; nOut.textContent = n;
+    data = simulate(eta, n); k = n;
+    redraw(k);
+  }
   function frame() {
-    var per = Math.max(1, Math.round(0.45 / (TMAX / data.n)));   // about 0.45 time units per frame
-    k = Math.min(data.n, k + per);
-    draw(k);
+    k = Math.min(data.n, k + Math.max(1, Math.ceil(data.n / 300)));   // about 5 seconds whatever the length
+    redraw(k);
     raf = k < data.n ? requestAnimationFrame(frame) : 0;
   }
-  function start() {
+  function play() {
     cancelAnimationFrame(raf);
-    var eta = parseFloat(slider.value);
-    out.textContent = eta.toFixed(2);
-    data = simulate(eta); k = 0;
-    if (reduce) { k = data.n; draw(k); raf = 0; return; }
-    draw(0); raf = requestAnimationFrame(frame);
+    if (reduce) { k = data.n; redraw(k); raf = 0; return; }
+    k = 0; redraw(0); raf = requestAnimationFrame(frame);
+    replay.textContent = "Replay";
   }
-  slider.addEventListener("input", start);
-  replay.addEventListener("click", start);
-  window.addEventListener("resize", function () { if (data) draw(k); });
-  // Start when visible (saves work if the page is opened in the background).
-  if ("IntersectionObserver" in window) {
-    var io = new IntersectionObserver(function (e) { if (e[0].isIntersecting) { io.disconnect(); start(); } }, { threshold: 0.3 });
-    io.observe(canvas);
-  } else start();
+  etaSl.addEventListener("input", compute);
+  nSl.addEventListener("input", compute);
+  replay.addEventListener("click", play);
+  window.addEventListener("resize", function () { if (data) redraw(k); });
+
+  // Click on a figure: enlarged view (Escape, x or a click outside closes it).
+  var host = document.querySelector(".sk") || document.body, overlay = null;
+  function closeZoom() { if (overlay) { overlay.remove(); overlay = null; zoom = null; } }
+  function openZoom(cv) {
+    closeZoom();
+    var kind = cv === canvas ? "sim" : "probs";
+    overlay = document.createElement("div"); overlay.className = "sk-zoom";
+    var box = document.createElement("div"); box.className = "sk-zoom-box"; box.setAttribute("role", "dialog"); box.setAttribute("aria-label", "Enlarged figure");
+    var x = document.createElement("button"); x.type = "button"; x.className = "sk-zoom-x"; x.textContent = "\u00d7"; x.setAttribute("aria-label", "Close");
+    var big = document.createElement("canvas");
+    var cap = cv.parentNode.querySelector("figcaption");
+    box.appendChild(x); box.appendChild(big);
+    if (cap) { var p = document.createElement("p"); p.textContent = cap.textContent; box.appendChild(p); }
+    overlay.appendChild(box); host.appendChild(overlay);
+    overlay.addEventListener("click", function (e) { if (e.target === overlay || e.target === x) closeZoom(); });
+    zoom = { cv: big, kind: kind };
+    redraw(k); x.focus();
+  }
+  [canvas, pcanvas].forEach(function (cv) {
+    cv.tabIndex = 0; cv.style.cursor = "zoom-in";
+    cv.addEventListener("click", function () { openZoom(cv); });
+    cv.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openZoom(cv); } });
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeZoom(); });
+
+  compute();                            // final state on load; the button plays it
 })();
