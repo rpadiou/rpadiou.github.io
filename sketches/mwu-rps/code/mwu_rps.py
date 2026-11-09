@@ -153,6 +153,7 @@ def verify(r):
     assert eo[-1] < 0.2 * em[-1]
     # Head to head: optimistic player (1) against plain MWU player (2), 4 step sizes x 20 starting points
     duel_rates = {}
+    short_opt, short_plain = [], []
     for eta in (0.05, 0.1, 0.2, 0.4):
         T_ = int(600 / eta); rates = []
         for sd in range(20):
@@ -162,7 +163,11 @@ def verify(r):
             assert tot[-1] > 0, (eta, sd)                                      # optimistic player ends ahead
             assert tot[-1] < np.log(3) / eta + eta * T_ / 2, (eta, sd)         # plain MWU's loss within Hedge's regret bound
             rates.append(tot[-1] / T_)
+            Xq, Yq, _ = duel(eta, T_, True, False, xa, ya)                    # who plays closer to a best response?
+            gx_, gy_ = Yq @ A.T, -(Xq @ A)
+            short_opt.append(np.mean(gx_.max(1) - np.sum(Xq * gx_, 1))); short_plain.append(np.mean(gy_.max(1) - np.sum(Yq * gy_, 1)))
         duel_rates[str(eta)] = dict(T=T_, mean=float(np.mean(rates)), min=float(np.min(rates)), max=float(np.max(rates)))
+    assert np.mean(short_opt) < np.mean(short_plain)                              # optimistic player is closer to a best response
     Xd, Yd, totd = duel(ETA, DUEL_T, True, False, r["x0"], r["y0"])
     tail = slice(DUEL_T // 2, None)
     kx, ky = kl_nash(Xd)[tail], kl_nash(Yd)[tail]
@@ -346,51 +351,49 @@ def uniform_figure(path, eta=0.2, T=80):
     fig.savefig(path, facecolor=th["bg"]); plt.close(fig)
 
 
-def duel_figure(path, r, eta=ETA, T=DUEL_T, window=240):
-    """Left: player 1's total points in four pairings. Right: the optimistic-vs-plain pairing on the triangle."""
+def duel_figure(path, r, eta=ETA, T=DUEL_T):
+    """Optimistic player (1) against plain MWU (2). The game is zero-sum, so one player's total is the other's
+    opposite: only the optimistic player's total is drawn. Left: 20 starting points. Right: gain per round vs eta."""
     th = THEMES["light"]
     plt.rcParams["font.family"] = "DejaVu Sans"
-    Xd, Yd, tot = duel(eta, T, True, False, r["x0"], r["y0"])        # optimistic (1) vs plain (2)
-    _, _, tm = duel(eta, T, False, False, r["x0"], r["y0"])
-    _, _, to = duel(eta, T, True, True, r["x0"], r["y0"])
-    t = np.arange(T + 1)
-    fig = plt.figure(figsize=(11, 4.8), dpi=160, facecolor=th["bg"])
-    ax = fig.add_axes([.075, .16, .40, .70], facecolor=th["bg"])
-    for s_ in ("top", "right"):
-        ax.spines[s_].set_visible(False)
-    for s_ in ("left", "bottom"):
-        ax.spines[s_].set_color(th["faint"])
-    ax.tick_params(colors=th["grey"], labelsize=13)
-    ax.plot(t, tm, color=th["faint"], lw=2.2); ax.plot(t, to, color=th["faint"], lw=2.2)
-    ax.plot(t, 0 * t, color=th["grey"], lw=1, ls=(0, (4, 3)))
-    ax.plot(t, tot, color=GREEN, lw=3); ax.plot(t, -tot, color=RED, lw=3)
-    ax.set_xlim(0, T * 1.02)
-    ax.text(T * .03, tot[-1] * .93, "optimistic player", color=GREEN, fontsize=15, fontweight="bold", va="top")
-    ax.text(T * .03, -tot[-1] * .93, "plain MWU player", color=RED, fontsize=15, fontweight="bold", va="bottom")
-    ax.annotate("same rule on both sides", xy=(T * .26, 12), xytext=(T * .03, 41), color=th["grey"], fontsize=13, va="bottom",
-                arrowprops=dict(arrowstyle="-", color=th["grey"], lw=1.2, shrinkA=2, shrinkB=0))
-    ax.set_xlabel("round", color=th["grey"], fontsize=14); ax.set_ylabel("total points won", color=th["grey"], fontsize=14)
-    fig.text(.075, .93, "The optimistic player wins, slowly", color=th["fg"], fontsize=16, fontweight="bold", va="center")
-    for k, (title, P, col) in enumerate((("Plain MWU player", Yd, RED),
-                                         ("Optimistic player", Xd, GREEN))):
-        axk = fig.add_axes([.58, .55 - k * .39, .39, .27], facecolor=th["bg"])
-        tt = np.arange(T - window, T + 1)
-        axk.axhline(1 / 3, color=th["fg"], lw=1.2, ls=(0, (4, 3)), zorder=1)
-        for i, al in enumerate((1.0, .62, .38)):
-            axk.plot(tt, P[-window - 1:, i], color=col, lw=2.2, alpha=al, zorder=3)
-        axk.set_ylim(-.02, 1.02); axk.set_xlim(tt[0], tt[-1])
-        axk.set_yticks([0, 1 / 3, 1]); axk.set_yticklabels(["0", "1/3", "1"])
+    fig = plt.figure(figsize=(11, 4.6), dpi=160, facecolor=th["bg"])
+    axes = [fig.add_axes([.075, .16, .40, .68], facecolor=th["bg"]), fig.add_axes([.60, .16, .38, .68], facecolor=th["bg"])]
+    for ax in axes:
         for s_ in ("top", "right"):
-            axk.spines[s_].set_visible(False)
+            ax.spines[s_].set_visible(False)
         for s_ in ("left", "bottom"):
-            axk.spines[s_].set_color(th["faint"])
-        axk.tick_params(colors=th["grey"], labelsize=13)
-        if k == 0: axk.set_xticklabels([])
-        else: axk.set_xlabel("round", color=th["grey"], fontsize=14)
-        axk.set_title(title, loc="left", color=col, fontsize=15, fontweight="bold", pad=6)
-    fig.text(.58, .93, "Both keep swinging", color=th["fg"], fontsize=15, fontweight="bold", va="center")
+            ax.spines[s_].set_color(th["faint"])
+        ax.tick_params(colors=th["grey"], labelsize=13)
+    ax, bx = axes
+    t = np.arange(T + 1)
+    for sd in range(20):
+        g = np.random.default_rng(100 + sd)
+        _, _, tot = duel(eta, T, True, False, g.dirichlet([2, 2, 2]), g.dirichlet([2, 2, 2]))
+        ax.plot(t, tot, color=GREEN, lw=1.6, alpha=.35)
+    _, _, tot = duel(eta, T, True, False, r["x0"], r["y0"])
+    ax.plot(t, tot, color=GREEN, lw=3.4)
+    ax.axhline(0, color=th["grey"], lw=1, ls=(0, (4, 3)))
+    ax.set_xlim(0, T * 1.02)
+    ax.text(T * .03, ax.get_ylim()[1] * .92, "optimistic player's total\n(plain player: the opposite)", color=GREEN, fontsize=13, fontweight="bold", va="top", linespacing=1.25)
+    ax.set_xlabel("round", color=th["grey"], fontsize=14); ax.set_ylabel("points won", color=th["grey"], fontsize=14)
+    fig.text(.075, .93, "Ahead in every one of 20 starts", color=th["fg"], fontsize=16, fontweight="bold", va="center")
+    etas = (0.05, 0.1, 0.2, 0.4); means = []
+    for k, e in enumerate(etas):
+        T_ = int(600 / e); rates = []
+        for sd in range(20):
+            g = np.random.default_rng(100 + sd)
+            _, _, tt = duel(e, T_, True, False, g.dirichlet([2, 2, 2]), g.dirichlet([2, 2, 2]))
+            rates.append(tt[-1] / T_)
+        jit = np.exp(np.random.default_rng(0).uniform(-.06, .06, 20))
+        bx.plot(e * jit, rates, "o", color=GREEN, alpha=.4, ms=6, mew=0)
+        means.append(np.mean(rates))
+    bx.plot(etas, means, "-", color=GREEN, lw=3)
+    bx.set_xscale("log"); bx.set_yscale("log")
+    bx.set_xticks(etas); bx.set_xticklabels([str(e) for e in etas]); bx.minorticks_off()
+    bx.set_xlabel("step size η", color=th["grey"], fontsize=14); bx.set_ylabel("points per round", color=th["grey"], fontsize=14)
+    fig.text(.60, .93, "The edge grows with η", color=th["fg"], fontsize=16, fontweight="bold", va="center")
     fig.savefig(path, facecolor=th["bg"]); plt.close(fig)
-    return tot[-1], tm[-1], to[-1]
+    return tot[-1]
 
 
 if __name__ == "__main__":
