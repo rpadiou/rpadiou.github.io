@@ -13,7 +13,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="../../assets/fonts/stix-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../../assets/css/style.css?v=26">
+  <link rel="stylesheet" href="../../assets/css/style.css?v=27">
 </head>
 <body class="sk">
 <div class="layout">
@@ -41,34 +41,49 @@
     <article>
       <h2 class="sk-title">Never settling, yet always fair: Multiplicative Weights in Rock-Paper-Scissors</h2>
 
-      <nav class="sk-toc" aria-label="Contents"><a href="#setting">Setting</a><a href="#obvious">Isn't it obvious?</a><a href="#results">Results</a><a href="#try">Try it</a><a href="#refs">References</a></nav>
+      <ol class="sk-toc" aria-label="Contents">
+        <li><a href="#setting">The setting</a><span>rock-paper-scissors, Nash equilibrium, the learning rule</span></li>
+        <li><a href="#why">Why study it</a><span>the answer is known; what learners do on the way is not</span></li>
+        <li><a href="#three">Three ways to play</a><span>plain MWU, its average, optimistic MWU, and why the variants exist</span></li>
+        <li><a href="#self">Same rule on both sides</a><span>animation with step size and number of rounds</span></li>
+        <li><a href="#duel">Different rules</a><span>plain MWU against optimistic MWU</span></li>
+        <li><a href="#refs">References</a><span>and the code</span></li>
+      </ol>
 
       <div class="sk-body">
-        <div class="sk-intro" id="setting">
-          <p class="sk-h2">The setting, in plain words</p>
-          <p>Think of rock-paper-scissors. If you always play rock, I will soon notice and play paper. The only way not to be beaten is to <em>mix</em> your moves unpredictably, one third each. Then nothing I do can give me an edge. Such a pair of strategies, where neither player gains by changing their own on their own, is called a <strong>Nash equilibrium</strong>. Here it is unique: both players play (1/3, 1/3, 1/3).</p>
-          <p>Why care? Because more and more decisions are made by algorithms that <em>learn</em> by playing against each other: pricing bots, bidders in ad auctions, trading agents, the two networks of a GAN. When everybody keeps adapting to everybody, does the behaviour calm down at the equilibrium, go round in circles, or blow up? Rock-paper-scissors is the smallest example where the answer is not obvious.</p>
-          <p>The learning rule studied here, <strong>Multiplicative Weights (MWU, also called Hedge)</strong>, is one of the simplest: keep a weight for each move, and after every round boost the moves that would have done well against what the opponent just did. A move's <em>payoff</em> is the score it would have earned (+1 for a win, 0 for a draw, −1 for a loss, averaged over the opponent's current mix). The boost is a multiplication by <span class="mono">exp(η · payoff)</span>: a good move gets more weight, a bad one less, weights stay positive, and the effect compounds from round to round. The number η, the learning rate, says how strongly to react. Finally the weights are rescaled to sum to 1, so they read as probabilities.</p>
-        </div>
+        <h3 class="sk-sec" id="setting">1. The setting</h3>
+        <p>Take rock-paper-scissors. If you always play rock, I will notice and play paper. The only safe thing is to mix your moves unpredictably, one third each. Then nothing I do gives me an edge. A pair of strategies where neither player gains by changing theirs alone is called a <strong>Nash equilibrium</strong>. Here it is unique: both players play (1/3, 1/3, 1/3).</p>
+        <p>Now suppose the players know none of this. After each round, each one only learns what every move would have earned against the opponent's last play, its <em>payoff</em>: +1 for a win, 0 for a draw, −1 for a loss. The learning rule I look at is <strong>Multiplicative Weights</strong> (MWU, also called Hedge). Every move has a weight. After each round the weight of a move is multiplied by <span class="mono">exp(η · payoff)</span>, so moves that would have won grow and moves that would have lost shrink, and this compounds from round to round. The weights are rescaled to sum to 1 and read as probabilities. The number η, the learning rate, says how hard the player reacts.</p>
 
-        <div class="sk-intro" id="obvious">
-          <p class="sk-h2">But isn't the answer obvious?</p>
-          <p>Yes: in rock-paper-scissors everybody knows the equilibrium, and playing uniformly at random reaches it on the very first move. That is exactly why it makes a good test tube: we know the right answer, so we can check whether a learner finds it. The real question is not “what is the equilibrium of this game?” but “what happens when players who <em>do not know the game</em>, only what they just earned, adapt to one another?”</p>
-          <p>Playing uniformly is also passive. It guarantees you break even against anyone, and it never profits from an opponent's habits. MWU needs no knowledge of the game or of the opponent, and in the long run it does almost as well as the best single move in hindsight, whatever the opponent does: against someone who favours rock it learns to play paper and wins (figure below), and it cannot be exploited much by a clever opponent either.</p>
-          <p>Real games are not rock-paper-scissors. The payoff table may be astronomically large (poker), unknown (markets, auctions), or the “moves” may be the weights of a neural network (the two networks of a GAN). Nobody can write the equilibrium down; algorithms of this family, which minimise regret, are how equilibria are approached from payoffs alone (poker programs use counterfactual regret minimisation, boosting is MWU in disguise).</p>
-          <p>Then <em>how</em> they converge matters. In a real system, what runs is the current strategy, not an average of past ones: a generator network, a trading agent's present policy. Averaging is easy on a table of probabilities and often impossible on a neural network. So the question is whether the <em>last iterate</em> settles, and how many rounds that costs. Plain MWU's does not, which is why the optimistic variant (used to train GANs by Daskalakis et al., 2018) is interesting. Even for the average, optimism helps: after 20,000 rounds with η = 0.1, the average of the optimistic iterates is about ten times closer to equilibrium than the average of plain MWU (0.001 against 0.012, one run).</p>
-        </div>
+        <h3 class="sk-sec" id="why">2. Why study it</h3>
+        <p>The equilibrium of this game is known, and playing uniformly at random reaches it on the first move. So the goal is not to find 1/3. The game is a test tube: since we know the right answer, we can see what learners do when they do not. The question is what happens when two players who only see their own payoffs keep adapting to each other.</p>
+        <p>Real games are bigger: poker, auctions, markets, the two networks of a GAN. Nobody can write their equilibrium down, and rules of this family are used to approach it from payoffs alone. Two things then matter. One is whether the strategy actually being played settles down. In a real system what runs is the current strategy, and averaging past ones is often impossible (try averaging two neural networks). The other is how many rounds this takes.</p>
+        <p>Uniform play is also passive. It earns exactly 0 against anyone and never profits from a habit. MWU knows nothing about the game and still ends up close to the best single move in hindsight. Against an opponent who plays rock half the time, it finds paper on its own.</p>
         <figure class="sk-fig-s">
           <img src="figure-uniform.png" width="1760" height="704" alt="Left: against an opponent who favours rock, MWU puts its probability on paper within about 40 rounds. Right: its average payoff per round climbs from 0 to 0.3, the best single move, while uniform play stays at exactly zero.">
           <figcaption>The opponent plays rock 50%, paper 30%, scissors 20% every round; η = 0.2, first 80 rounds shown. Paper beats rock more often than it loses to scissors, so it earns 0.3 per round on average, and MWU finds this from payoffs alone. Uniform play earns exactly 0 whatever the opponent does. Over 600 rounds, MWU ends within 6 points of the best single move in hindsight.</figcaption>
         </figure>
+        <p>One caveat: the guarantee is against the best <em>fixed</em> move. An opponent who changes habits halfway is harder, and MWU with a fixed η is slow to follow. I did not plot that case.</p>
 
-        <p id="results">Back to the question: do two MWU players end up at Nash?</p>
-        <p><span class="c-red">Plain MWU does not.</span> The strategy spirals away from the centre, towards the edge of the triangle: the KL divergence to Nash (a measure of distance between two probability vectors) grows at every step (Bailey &amp; Piliouras, 2018). In the run below it goes from 0.63 to 5.0 in 400 rounds, and one player ends up playing scissors 94% of the time. <span class="c-blue">The average does.</span> Each player's regret (how much they lose compared with the best fixed move in hindsight) grows slowly, so the <em>time-averaged</em> strategies form an approximate equilibrium, with a guaranteed error of order η + 1/(ηT): in our run it is within 0.03 of (1/3, 1/3, 1/3) after 400 rounds.</p>
-        <p><span class="c-green">Optimistic MWU does too, and without averaging.</span> Counting the latest payoff twice, with the update <span class="mono">2g<sub>t</sub> − g<sub>t−1</sub></span> (where g<sub>t</sub> is the payoff vector at round t), makes the strategy itself converge to Nash for a small enough step size (Daskalakis &amp; Panageas, 2019): here the KL divergence falls from 0.63 to 0.003.</p>
+        <h3 class="sk-sec" id="three">3. Three ways to play</h3>
+        <p><strong>Plain MWU</strong> is the rule above. Its update only reacts to the payoffs of the round that just ended, so it is always one step late. If the opponent has been playing a lot of paper, scissors did well, and MWU moves towards scissors. By then the opponent has moved on to rock. Both players chase each other round the triangle. The steps have a finite size, so each loop ends slightly further out than it started, and the strategy drifts towards the edge (Bailey &amp; Piliouras, 2018).</p>
+        <p><strong>The average of MWU</strong> is not a different player. It is the same sequence, averaged over time. The loops cancel out and the average goes to Nash, because over many rounds neither player can lose much compared with a fixed move. What is actually played is still the looping strategy, so this is a statement about the history, not about the play.</p>
+        <p><strong>Optimistic MWU</strong> (OMWU) changes the rule itself. The exponent uses <span class="mono">2g<sub>t</sub> − g<sub>t−1</sub></span> instead of <span class="mono">g<sub>t</sub></span>, where g<sub>t</sub> is the payoff vector at round t. This is the latest payoff plus the change since the round before, a guess of what the next payoff will be. The player reacts to where the opponent is going instead of where it was, which removes most of the lateness. The loops now shrink, and the strategy itself converges to Nash for small enough η (Daskalakis &amp; Panageas, 2019).</p>
+        <p>The variants exist because each one repairs something different. Averaging fixes the numbers but not the play. Optimism fixes the play, at the price of remembering one more payoff vector and of a convergence result that needs a small η. If you can store the average, it is enough. If you deploy the current strategy, as a GAN does (Daskalakis et al., 2018), you want optimism.</p>
+        <table class="sk-tab">
+          <thead><tr><th></th><th>Exponent</th><th>What is played</th><th>In self-play</th></tr></thead>
+          <tbody>
+            <tr><td><span class="c-red">Plain MWU</span></td><td class="mono">g<sub>t</sub></td><td>current strategy</td><td>loops outwards, never settles</td></tr>
+            <tr><td><span class="c-blue">Its average</span></td><td>same as plain</td><td>current strategy (the average is only computed)</td><td>average goes to Nash</td></tr>
+            <tr><td><span class="c-green">Optimistic MWU</span></td><td class="mono">2g<sub>t</sub> − g<sub>t−1</sub></td><td>current strategy</td><td>loops inwards, converges</td></tr>
+          </tbody>
+        </table>
+
+        <h3 class="sk-sec" id="self">4. Same rule on both sides</h3>
+        <p>Two players use the same rule and start away from the centre. The animation shows player 1. Press Play, or move the sliders to change the step size and the number of rounds.</p>
       </div>
 
-      <div class="sk-anim" id="try">
+      <div class="sk-anim">
         <div class="anim-grid">
           <figure>
             <canvas id="sim" width="640" height="672" role="img" aria-label="Trajectories of MWU, its average and optimistic MWU on the rock-paper-scissors simplex"></canvas>
@@ -87,8 +102,17 @@
       </div>
 
       <div class="sk-body">
-        <p class="sk-note">Both sliders are logarithmic. The animation runs the same dynamics in your browser as the Python script (same start). A small η gives a slow, wide spiral, so give it more rounds; a large η makes plain MWU hit the edge sooner. Optimistic MWU is only guaranteed to converge for η small enough: in this run I checked numerically that it converges for every η up to 0.5, but the guarantee is only for small η. Click a figure to enlarge it.</p>
+        <p><span class="c-red">Plain MWU does not settle.</span> The strategy spirals out to the edge of the triangle. The KL divergence to Nash, a measure of the distance between two probability vectors, grows at every round. In the default run it goes from 0.63 to 5.0 in 400 rounds, and one player ends up playing scissors 94% of the time. <span class="c-blue">The average does settle.</span> It is within 0.03 of (1/3, 1/3, 1/3) after 400 rounds, and in general within about η + 1/(ηT) of it. <span class="c-green">Optimistic MWU settles too</span>, with no averaging: the KL divergence falls from 0.63 to 0.003.</p>
+        <p class="sk-note">Both sliders are logarithmic. A small η gives a slow, wide spiral, so give it more rounds. A large η makes plain MWU reach the edge sooner. For optimistic MWU the theory needs a small η; in this run I checked numerically that it converges for η up to 0.5. The animation runs the same dynamics as the Python script, from the same start. Click a figure to enlarge it.</p>
+
+        <h3 class="sk-sec" id="duel">5. Different rules</h3>
+        <p>If the point is how learners adapt to each other, they should also meet learners that adapt differently. So I made plain MWU play against optimistic MWU, with the same η and the same starting points as above.</p>
+        <p>Neither of them settles at Nash. Both keep swinging between nearly 0 and nearly 1, like plain MWU does against itself. But the optimistic player comes out ahead. In this run it wins 68 points over 3000 rounds, while the same rule on both sides stays around 0, up to the swings of the loops. This is not an accident of the start: I tried 20 random starting points for each of η = 0.05, 0.1, 0.2 and 0.4, and the optimistic player finished ahead in all 80 runs. The gain is small, about 0.01 points per round at η = 0.2 (0.002 at η = 0.05, 0.04 at η = 0.4). It is also consistent with the guarantee above, since the plain player's loss stays well below the regret bound. My reading is the lateness again: the optimistic player answers where the plain one is heading, and the plain one answers where the optimistic one was.</p>
       </div>
+      <figure class="sk-fig-s sk-fig-wide">
+        <img src="figure-duel.png" width="1760" height="768" alt="Left: total points of an optimistic MWU player against a plain MWU player over 3000 rounds, growing steadily for the optimistic one, while the same rule on both sides stays near zero. Right: the probabilities of each move for both players over the last 240 rounds, swinging between 0 and 1.">
+        <figcaption>Optimistic MWU (player 1) against plain MWU (player 2), η = 0.2, 3000 rounds. Left: total points won. The grey curve is the same rule on both sides, which wanders around 0. Right: the probability of each move for both players, in the last 240 rounds.</figcaption>
+      </figure>
 
       <h3 class="sk-h" id="refs">References</h3>
       <ol class="refs">
@@ -104,6 +128,6 @@
   </main>
 
 </div>
-<script src="anim.js?v=5"></script>
+<script src="anim.js?v=6"></script>
 </body>
 </html>

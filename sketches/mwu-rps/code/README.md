@@ -2,4 +2,4 @@
 
     uv run mwu_rps.py
 
-Runs the simulation (seed fixed), checks every claim made on the page with assertions (KL to Nash increasing for MWU, decreasing for optimistic MWU, average close to Nash, several step sizes and seeds), writes `results.json`, and regenerates `../tweet.png`. Takes about a minute.
+Runs the simulation (seed fixed), checks every claim made on the page with assertions (KL to Nash increasing for MWU, decreasing for optimistic MWU, average close to Nash, several step sizes and seeds), writes `results.json`, and regenerates `../tweet.png`, `../figure-uniform.png`, `../figure-duel.png`. Takes about a minute.

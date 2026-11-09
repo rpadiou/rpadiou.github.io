@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 SEED = 3
 ETA = 0.2
 T = 400
+DUEL_T = 3000
 HERE = pathlib.Path(__file__).resolve().parent
 OUT = HERE.parent
 
@@ -40,6 +41,23 @@ def simulate(eta, T, optimistic, x0, y0):
         y = y * np.exp(eta * ey); y /= y.sum()
         X.append(x); Y.append(y)
     return np.array(X), np.array(Y)
+
+
+def duel(eta, T, opt1, opt2, x0, y0):
+    """Player 1 uses optimistic MWU if opt1, player 2 if opt2 (plain MWU otherwise).
+    Returns both players' iterates and player 1's cumulative expected payoff."""
+    x, y = x0.copy(), y0.copy()
+    px, py = A @ y, -A.T @ x
+    X, Y, tot = [x], [y], [0.0]
+    for _ in range(T):
+        gx, gy = A @ y, -A.T @ x
+        tot.append(tot[-1] + x @ A @ y)
+        ex, ey = (2 * gx - px if opt1 else gx), (2 * gy - py if opt2 else gy)
+        px, py = gx, gy
+        x = x * np.exp(eta * ex); x /= x.sum()
+        y = y * np.exp(eta * ey); y /= y.sum()
+        X.append(x); Y.append(y)
+    return np.array(X), np.array(Y), np.array(tot)
 
 
 def running_mean(P):
@@ -128,6 +146,22 @@ def verify(r):
     lm = run_all(0.1, 20000)
     em, eo = exploitability_curve(lm["Xm"], lm["Ym"]), exploitability_curve(lm["Xo"], lm["Yo"])
     assert eo[-1] < 0.2 * em[-1]
+    # Head to head: optimistic player (1) against plain MWU player (2), 4 step sizes x 20 starting points
+    duel_rates = {}
+    for eta in (0.05, 0.1, 0.2, 0.4):
+        T_ = int(600 / eta); rates = []
+        for sd in range(20):
+            g = np.random.default_rng(100 + sd)
+            xa, ya = g.dirichlet([2, 2, 2]), g.dirichlet([2, 2, 2])
+            _, _, tot = duel(eta, T_, True, False, xa, ya)
+            assert tot[-1] > 0, (eta, sd)                                      # optimistic player ends ahead
+            assert tot[-1] < np.log(3) / eta + eta * T_ / 2, (eta, sd)         # plain MWU's loss within Hedge's regret bound
+            rates.append(tot[-1] / T_)
+        duel_rates[str(eta)] = dict(T=T_, mean=float(np.mean(rates)), min=float(np.min(rates)), max=float(np.max(rates)))
+    Xd, Yd, totd = duel(ETA, DUEL_T, True, False, r["x0"], r["y0"])
+    tail = slice(DUEL_T // 2, None)
+    kx, ky = kl_nash(Xd)[tail], kl_nash(Yd)[tail]
+    assert kx.min() > 0.05 and ky.min() > 0.05                                 # neither player converges to Nash
     n = len(Dm) - 1
     return dict(
         eta=ETA, T=T, seed=SEED, x0=r["x0"].tolist(), y0=r["y0"].tolist(),
@@ -141,6 +175,10 @@ def verify(r):
         robustness_cases=len(rob),
         vs_biased_opponent=dict(opponent=OPP.tolist(), eta=0.2, T=600, mwu_total=float(cum[-1]), best_fixed_total=float(bestfixed[-1].max()),
                                 regret=float(bestfixed[-1].max() - cum[-1]), regret_bound=float(bound), uniform_total=0.0),
+        head_to_head=dict(eta=ETA, T=DUEL_T, optimistic_total=float(totd[-1]),
+                          kl_optimistic_second_half=[float(kx.min()), float(kx.max())],
+                          kl_plain_second_half=[float(ky.min()), float(ky.max())],
+                          per_round_by_eta_20_starts=duel_rates),
         exploitability_of_average_T20000_eta0p1=dict(mwu=float(em[-1]), omwu=float(eo[-1])),
     )
 
@@ -170,7 +208,7 @@ def fade_line(ax, P, color, lw, z, glow=True):
     ax.add_collection(LineCollection(seg, colors=rgba, linewidths=lw, capstyle="butt", zorder=z))
 
 
-def draw_simplex(ax, th, r, fs, lw):
+def draw_simplex(ax, th, r, fs, lw, only=("m", "o", "a")):
     import matplotlib.tri as mtri
     from matplotlib.colors import LinearSegmentedColormap
     from matplotlib.patches import Polygon
@@ -189,14 +227,14 @@ def draw_simplex(ax, th, r, fs, lw):
     for v, (txt, off, ha, va) in zip(V, (("Rock", (0, .05), "center", "bottom"), ("Paper", (-.02, -.03), "right", "top"), ("Scissors", (.02, -.03), "left", "top"))):
         ax.text(*(v + off), txt, ha=ha, va=va, color=th["grey"], fontsize=fs)
     m, a, o = xy(r["Xm"]), xy(r["Xa"]), xy(r["Xo"])
-    fade_line(ax, m, RED, lw, 3)
-    fade_line(ax, o, GREEN, lw, 4)
-    fade_line(ax, a, BLUE, lw * 1.25, 5)
+    if "m" in only: fade_line(ax, m, RED, lw, 3)
+    if "o" in only: fade_line(ax, o, GREEN, lw, 4)
+    if "a" in only: fade_line(ax, a, BLUE, lw * 1.25, 5)
     for P_, col in ((m, RED),):          # bright heads
         ax.plot(*P_[-1], "o", ms=fs * .5, color=col, mec="white", mew=1.5, zorder=8)
     c = xy(NASH[None])[0]
     ax.plot(*c, marker="*", ms=fs * 1.1, mfc="#ffd23f", mec=th["fg"], mew=lw * .7, zorder=9)
-    ax.plot(*m[0], marker="o", ms=fs * .45, color=th["fg"], zorder=9)
+    if len(only) == 3: ax.plot(*m[0], marker="o", ms=fs * .45, color=th["fg"], zorder=9)
     return m, a, o, c
 
 
@@ -303,6 +341,53 @@ def uniform_figure(path, eta=0.2, T=80):
     fig.savefig(path, facecolor=th["bg"]); plt.close(fig)
 
 
+def duel_figure(path, r, eta=ETA, T=DUEL_T, window=240):
+    """Left: player 1's total points in four pairings. Right: the optimistic-vs-plain pairing on the triangle."""
+    th = THEMES["light"]
+    plt.rcParams["font.family"] = "DejaVu Sans"
+    Xd, Yd, tot = duel(eta, T, True, False, r["x0"], r["y0"])        # optimistic (1) vs plain (2)
+    _, _, tm = duel(eta, T, False, False, r["x0"], r["y0"])
+    _, _, to = duel(eta, T, True, True, r["x0"], r["y0"])
+    t = np.arange(T + 1)
+    fig = plt.figure(figsize=(11, 4.8), dpi=160, facecolor=th["bg"])
+    ax = fig.add_axes([.075, .16, .40, .70], facecolor=th["bg"])
+    for s_ in ("top", "right"):
+        ax.spines[s_].set_visible(False)
+    for s_ in ("left", "bottom"):
+        ax.spines[s_].set_color(th["faint"])
+    ax.tick_params(colors=th["grey"], labelsize=13)
+    ax.plot(t, tm, color=th["faint"], lw=2.2); ax.plot(t, to, color=th["faint"], lw=2.2)
+    ax.plot(t, 0 * t, color=th["grey"], lw=1, ls=(0, (4, 3)))
+    ax.plot(t, tot, color=GREEN, lw=3); ax.plot(t, -tot, color=RED, lw=3)
+    ax.set_xlim(0, T * 1.02)
+    ax.text(T * .03, tot[-1] * .93, "optimistic player", color=GREEN, fontsize=15, fontweight="bold", va="top")
+    ax.text(T * .03, -tot[-1] * .93, "plain MWU player", color=RED, fontsize=15, fontweight="bold", va="bottom")
+    ax.annotate("same rule on both sides", xy=(T * .26, 12), xytext=(T * .03, 41), color=th["grey"], fontsize=13, va="bottom",
+                arrowprops=dict(arrowstyle="-", color=th["grey"], lw=1.2, shrinkA=2, shrinkB=0))
+    ax.set_xlabel("round", color=th["grey"], fontsize=14); ax.set_ylabel("total points won", color=th["grey"], fontsize=14)
+    fig.text(.075, .93, "The optimistic player wins, slowly", color=th["fg"], fontsize=16, fontweight="bold", va="center")
+    for k, (title, P, col) in enumerate((("Plain MWU player", Yd, RED),
+                                         ("Optimistic player", Xd, GREEN))):
+        axk = fig.add_axes([.58, .55 - k * .39, .39, .27], facecolor=th["bg"])
+        tt = np.arange(T - window, T + 1)
+        axk.axhline(1 / 3, color=th["fg"], lw=1.2, ls=(0, (4, 3)), zorder=1)
+        for i, al in enumerate((1.0, .62, .38)):
+            axk.plot(tt, P[-window - 1:, i], color=col, lw=2.2, alpha=al, zorder=3)
+        axk.set_ylim(-.02, 1.02); axk.set_xlim(tt[0], tt[-1])
+        axk.set_yticks([0, 1 / 3, 1]); axk.set_yticklabels(["0", "1/3", "1"])
+        for s_ in ("top", "right"):
+            axk.spines[s_].set_visible(False)
+        for s_ in ("left", "bottom"):
+            axk.spines[s_].set_color(th["faint"])
+        axk.tick_params(colors=th["grey"], labelsize=13)
+        if k == 0: axk.set_xticklabels([])
+        else: axk.set_xlabel("round", color=th["grey"], fontsize=14)
+        axk.set_title(title, loc="left", color=col, fontsize=15, fontweight="bold", pad=6)
+    fig.text(.58, .93, "Both keep swinging", color=th["fg"], fontsize=15, fontweight="bold", va="center")
+    fig.savefig(path, facecolor=th["bg"]); plt.close(fig)
+    return tot[-1], tm[-1], to[-1]
+
+
 if __name__ == "__main__":
     r = run_all()
     res = verify(r)
@@ -310,4 +395,5 @@ if __name__ == "__main__":
     print(json.dumps(res, indent=2))
     tweet(r, OUT / "tweet.png")
     uniform_figure(OUT / "figure-uniform.png")
+    print("duel totals", duel_figure(OUT / "figure-duel.png", r))
     print("wrote", OUT / "tweet.png")
