@@ -65,6 +65,26 @@ def run_all(eta=ETA, T=T, seed=SEED):
                 Xa=running_mean(Xm), Ya=running_mean(Ym))
 
 
+
+OPP = np.array([0.5, 0.3, 0.2])   # an opponent who favours rock, for the "why not play uniformly?" figure
+
+
+def vs_fixed_opponent(eta, T, opp=OPP):
+    """MWU player against a fixed (exploitable) opponent. Returns cumulative expected payoff and best fixed move's."""
+    x = NASH.copy(); G = np.zeros(3); cum = np.zeros(T + 1)
+    g = A @ opp
+    for t in range(T):
+        cum[t + 1] = cum[t] + x @ g
+        x = x * np.exp(eta * g); x /= x.sum()
+    return cum, np.arange(T + 1)[:, None] * g[None, :]
+
+
+def exploitability_curve(X, Y):
+    n = np.arange(1, len(X) + 1)[:, None]
+    xb, yb = np.cumsum(X, 0) / n, np.cumsum(Y, 0) / n
+    return np.max(yb @ A.T, 1) + np.max(-(xb @ A), 1)
+
+
 # ---------------------------------------------------------------- verification
 def verify(r):
     """Check every claim made on the page; raise if one fails. Returns the numbers."""
@@ -98,6 +118,16 @@ def verify(r):
     long = run_all(0.1, 20000)   # the average keeps getting closer as t grows
     assert np.abs(long["Xa"][-1] - NASH).max() < 0.005
     assert exploitability(long["Xa"][-1], long["Ya"][-1]) < 0.02
+    # Why not play uniformly? Uniform guarantees 0 against anyone; MWU profits from a biased opponent
+    assert np.allclose(NASH @ A, 0) and np.allclose(A @ NASH, 0)
+    cum, bestfixed = vs_fixed_opponent(0.2, 600)
+    bound = np.log(3) / 0.2 + 0.2 * 600 / 2
+    assert cum[-1] > 0.4 * 600 * 0.3 * 1.0                          # clearly positive (uniform: exactly 0)
+    assert bestfixed[-1].max() - cum[-1] <= bound                  # regret bound of Hedge holds
+    # Speed of the averaged strategies, eta = 0.1: optimistic vs plain
+    lm = run_all(0.1, 20000)
+    em, eo = exploitability_curve(lm["Xm"], lm["Ym"]), exploitability_curve(lm["Xo"], lm["Yo"])
+    assert eo[-1] < 0.2 * em[-1]
     n = len(Dm) - 1
     return dict(
         eta=ETA, T=T, seed=SEED, x0=r["x0"].tolist(), y0=r["y0"].tolist(),
@@ -109,6 +139,9 @@ def verify(r):
         exploitability_avg_T20000_eta0p1=exploitability(long["Xa"][-1], long["Ya"][-1]),
         exploitability_mwu_last=exploitability(r["Xm"][-1], r["Ym"][-1]),
         robustness_cases=len(rob),
+        vs_biased_opponent=dict(opponent=OPP.tolist(), eta=0.2, T=600, mwu_total=float(cum[-1]), best_fixed_total=float(bestfixed[-1].max()),
+                                regret=float(bestfixed[-1].max() - cum[-1]), regret_bound=float(bound), uniform_total=0.0),
+        exploitability_of_average_T20000_eta0p1=dict(mwu=float(em[-1]), omwu=float(eo[-1])),
     )
 
 
@@ -227,6 +260,29 @@ def page_figure(r, path, theme):
     plt.close(fig)
 
 
+def uniform_figure(path, eta=0.2, T=600):
+    th = THEMES["light"]
+    plt.rcParams["font.family"] = "DejaVu Sans"
+    cum, bf = vs_fixed_opponent(eta, T)
+    t = np.arange(T + 1)
+    fig, ax = plt.subplots(figsize=(7.2, 4.2), dpi=160, facecolor=th["bg"])
+    ax.plot(t, bf[:, 2] * 0 + bf.max(1), color=th["grey"], lw=1.8, ls=(0, (4, 3)))
+    ax.plot(t, 0 * t, color=th["fg"], lw=3)
+    ax.plot(t, cum, color=RED, lw=3.4)
+    for s_ in ("top", "right"):
+        ax.spines[s_].set_visible(False)
+    for s_ in ("left", "bottom"):
+        ax.spines[s_].set_color(th["faint"])
+    ax.tick_params(colors=th["grey"], labelsize=13)
+    ax.set_xlabel("round", color=th["grey"], fontsize=14); ax.set_ylabel("total points won", color=th["grey"], fontsize=14)
+    ax.set_xlim(0, T * 1.02); ax.set_ylim(-14, bf.max() * 1.1)
+    ax.text(T * .40, cum[int(T * .40)] - 12, "MWU: learns to play paper", color=RED, fontsize=15, fontweight="bold", ha="left", va="top")
+    ax.text(T * .25, 12, "uniform play: exactly 0, always", color=th["fg"], fontsize=15, fontweight="bold", va="bottom")
+    ax.text(T * .02, bf.max(1)[T] * 1.01, "best single move in hindsight", color=th["grey"], fontsize=13, va="bottom")
+    ax.set_title("Against an opponent who favours rock", loc="left", color=th["fg"], fontsize=15, fontweight="bold", pad=10)
+    fig.tight_layout(); fig.savefig(path, facecolor=th["bg"]); plt.close(fig)
+
+
 if __name__ == "__main__":
     r = run_all()
     res = verify(r)
@@ -234,4 +290,5 @@ if __name__ == "__main__":
     print(json.dumps(res, indent=2))
     tweet(r, OUT / "tweet.png")
     page_figure(r, OUT / "figure.png", "light")
+    uniform_figure(OUT / "figure-uniform.png")
     print("wrote", OUT / "tweet.png")

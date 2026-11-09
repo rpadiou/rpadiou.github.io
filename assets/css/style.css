@@ -178,7 +178,9 @@ html.lens-open { overflow: hidden; }
 .sk figure { max-width: none; margin: 2.6rem 0; }
 .sk figure img { border: 0; display: block; }
 .sk .sk-anim { margin: 2.6rem 0; }
-.sk canvas { display: block; width: 100%; max-width: 34rem; aspect-ratio: 1 / .85; margin: 0 auto; }
+.sk .anim-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: .6rem 1rem; }
+.sk canvas { display: block; width: 100%; aspect-ratio: 1 / 1.02; margin: 0 auto; }
+.sk .sk-fig-s { max-width: 34rem; margin: 2rem 0 2.4rem; }
 .sk .controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1rem 1.6rem; margin-top: .6rem; font-size: 1rem; color: var(--muted); }
 .sk .controls label { display: inline-flex; align-items: center; gap: .7rem; }
 .sk .controls input[type=range] { width: 11rem; accent-color: var(--accent); }
@@ -199,6 +201,7 @@ html.lens-open { overflow: hidden; }
   .sk main > p, .sk .sk-body p { font-size: 1.1rem; }
 }
 
+.sk .sk-intro + .sk-intro { margin-top: 1.6rem; }
 .sk .sk-intro { border-left: 3px solid var(--rule); padding-left: 1.1rem; margin: 0 0 2rem; }
 .sk .sk-intro p { color: var(--text); }
 .sk .sk-intro .sk-h2 { font-size: .9rem; font-weight: 600; font-variant: small-caps; letter-spacing: .05em; color: var(--muted); margin: 0 0 .5rem; }

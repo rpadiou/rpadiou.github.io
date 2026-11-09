@@ -45,5 +45,23 @@
   "exploitability_avg": 0.11392252133429459,
   "exploitability_avg_T20000_eta0p1": 0.011893390244514412,
   "exploitability_mwu_last": 1.8824969049523386,
-  "robustness_cases": 15
+  "robustness_cases": 15,
+  "vs_biased_opponent": {
+    "opponent": [
+      0.5,
+      0.3,
+      0.2
+    ],
+    "eta": 0.2,
+    "T": 600,
+    "mwu_total": 174.35616074257993,
+    "best_fixed_total": 180.0,
+    "regret": 5.643839257420069,
+    "regret_bound": 65.49306144334055,
+    "uniform_total": 0.0
+  },
+  "exploitability_of_average_T20000_eta0p1": {
+    "mwu": 0.011893390244514412,
+    "omwu": 0.0010304635672931384
+  }
 }

@@ -13,6 +13,7 @@
   var replay = document.getElementById("replay");
   if (!canvas || !canvas.getContext) return;
   var ctx = canvas.getContext("2d");
+  var pcanvas = document.getElementById("probs"), pctx = pcanvas && pcanvas.getContext("2d");
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function mv(M, v, sign, transpose) {
@@ -116,6 +117,42 @@
     tag(data.M, red, "MWU", 9, -14, "left");
     tag(data.O, green, "optimistic MWU", -12, 24, "right");
     tag(data.A, blue, "average", 12, 18, "left");
+    drawProbs(upto);
+  }
+
+
+  // Right-hand canvas: probability of each move over time, one row per method.
+  function drawProbs(upto) {
+    if (!pctx) return;
+    var dpr = window.devicePixelRatio || 1, w = pcanvas.clientWidth, h = pcanvas.clientHeight;
+    if (pcanvas.width !== Math.round(w * dpr) || pcanvas.height !== Math.round(h * dpr)) { pcanvas.width = Math.round(w * dpr); pcanvas.height = Math.round(h * dpr); }
+    pctx.setTransform(dpr, 0, 0, dpr, 0, 0); pctx.clearRect(0, 0, w, h);
+    var fg = css("--text", "#111"), grey = css("--sk-grey", "#8a8a8a"), faint = css("--sk-faint", "#d9d9d9");
+    var rows = [["MWU: swings wider and wider", data.M, css("--sk-red", "#d55e00")],
+                ["Its average: settles at 1/3", data.A, css("--sk-blue", "#0072b2")],
+                ["Optimistic MWU: settles at 1/3", data.O, css("--sk-green", "#009e73")]];
+    var fs = Math.max(12, Math.min(16, w / 26)), left = 30, right = 6, top0 = 4, gap = 8;
+    var rh = (h - top0 - gap * 2 - 22) / 3, alphas = [1, 0.62, 0.38];
+    pctx.lineJoin = "round"; pctx.lineCap = "round";
+    for (var r = 0; r < 3; r++) {
+      var y0 = top0 + r * (rh + gap), ty = y0 + fs + 4, py0 = ty + 4, ph = rh - (fs + 8);
+      function X(t) { return left + (w - left - right) * t / data.n; }
+      function Yp(p) { return py0 + ph * (1 - p); }
+      pctx.font = "600 " + fs + "px 'STIX Two Text', Georgia, serif"; pctx.fillStyle = rows[r][2]; pctx.textAlign = "left"; pctx.textBaseline = "alphabetic";
+      pctx.fillText(rows[r][0], left, ty);
+      pctx.strokeStyle = faint; pctx.lineWidth = 1; pctx.beginPath(); pctx.moveTo(left, py0); pctx.lineTo(left, py0 + ph); pctx.lineTo(w - right, py0 + ph); pctx.stroke();
+      pctx.font = (fs - 2) + "px 'STIX Two Text', Georgia, serif"; pctx.fillStyle = grey; pctx.textAlign = "right";
+      pctx.fillText("1", left - 4, Yp(1) + 4); pctx.fillText("1/3", left - 4, Yp(1 / 3) + 4); pctx.fillText("0", left - 4, Yp(0) + 4);
+      pctx.setLineDash([4, 3]); pctx.strokeStyle = fg; pctx.lineWidth = 1; pctx.beginPath(); pctx.moveTo(left, Yp(1 / 3)); pctx.lineTo(w - right, Yp(1 / 3)); pctx.stroke(); pctx.setLineDash([]);
+      for (var i = 0; i < 3; i++) {
+        pctx.globalAlpha = alphas[i]; pctx.strokeStyle = rows[r][2]; pctx.lineWidth = 2; pctx.beginPath();
+        for (var t = 0; t <= upto; t++) { var q = rows[r][1][t][i]; t ? pctx.lineTo(X(t), Yp(q)) : pctx.moveTo(X(t), Yp(q)); }
+        pctx.stroke();
+      }
+      pctx.globalAlpha = 1;
+    }
+    pctx.font = (fs - 2) + "px 'STIX Two Text', Georgia, serif"; pctx.fillStyle = grey; pctx.textAlign = "right";
+    pctx.fillText("time", w - right, h - 4);
   }
 
   function frame() {
