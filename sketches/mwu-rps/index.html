@@ -13,7 +13,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="../../assets/fonts/stix-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../../assets/css/style.css?v=27">
+  <link rel="stylesheet" href="../../assets/css/style.css?v=28">
 </head>
 <body class="sk">
 <div class="layout">
@@ -58,7 +58,7 @@
         <h3 class="sk-sec" id="why">2. Why study it</h3>
         <p>The equilibrium of this game is known, and playing uniformly at random reaches it on the first move. So the goal is not to find 1/3. The game is a test tube: since we know the right answer, we can see what learners do when they do not. The question is what happens when two players who only see their own payoffs keep adapting to each other.</p>
         <p>Real games are bigger: poker, auctions, markets, the two networks of a GAN. Nobody can write their equilibrium down, and rules of this family are used to approach it from payoffs alone. Two things then matter. One is whether the strategy actually being played settles down. In a real system what runs is the current strategy, and averaging past ones is often impossible (try averaging two neural networks). The other is how many rounds this takes.</p>
-        <p>Uniform play is also passive. It earns exactly 0 against anyone and never profits from a habit. MWU knows nothing about the game and still ends up close to the best single move in hindsight. Against an opponent who plays rock half the time, it finds paper on its own.</p>
+        <p class="sk-key">Uniform play is also passive. It earns exactly 0 against anyone and never profits from a habit. MWU knows nothing about the game and still ends up close to the best single move in hindsight. Against an opponent who plays rock half the time, it finds paper on its own.</p>
         <figure class="sk-fig-s">
           <img src="figure-uniform.png" width="1760" height="704" alt="Left: against an opponent who favours rock, MWU puts its probability on paper within about 40 rounds. Right: its average payoff per round climbs from 0 to 0.3, the best single move, while uniform play stays at exactly zero.">
           <figcaption>The opponent plays rock 50%, paper 30%, scissors 20% every round; η = 0.2, first 80 rounds shown. Paper beats rock more often than it loses to scissors, so it earns 0.3 per round on average, and MWU finds this from payoffs alone. Uniform play earns exactly 0 whatever the opponent does. Over 600 rounds, MWU ends within 6 points of the best single move in hindsight.</figcaption>

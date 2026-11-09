@@ -142,6 +142,11 @@ def verify(r):
     bound = np.log(3) / 0.2 + 0.2 * 600 / 2
     assert cum[-1] > 0.4 * 600 * 0.3 * 1.0                          # clearly positive (uniform: exactly 0)
     assert bestfixed[-1].max() - cum[-1] <= bound                  # regret bound of Hedge holds
+    gg = A @ OPP                                                   # fixed opponent: x_t is proportional to exp(eta t g), in closed form
+    xs = np.exp(0.2 * np.arange(600)[:, None] * gg); xs /= xs.sum(1, keepdims=True)
+    assert abs(np.sum(xs * gg) - cum[-1]) < 1e-9                    # the closed form is the simulation
+    own_bound = 0.4 / (1 - np.exp(-0.4 * 0.2)) + 0.5 / (1 - np.exp(-0.5 * 0.2))   # explicit bound, independent of T
+    assert bestfixed[-1].max() - cum[-1] <= own_bound
     # Speed of the averaged strategies, eta = 0.1: optimistic vs plain
     lm = run_all(0.1, 20000)
     em, eo = exploitability_curve(lm["Xm"], lm["Ym"]), exploitability_curve(lm["Xo"], lm["Yo"])
