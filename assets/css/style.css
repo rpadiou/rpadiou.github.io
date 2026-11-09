@@ -166,3 +166,42 @@ html.lens-open { overflow: hidden; }
 .lens-close { position: sticky; top: 0; float: right; z-index: 2; width: 2rem; height: 2rem; margin: -.3rem -.3rem 0 .6rem; padding: 0; border: 1px solid var(--rule); border-radius: 50%; background: #fff; color: var(--text); font: 1.3rem/1 var(--font); cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
 .lens-close:hover { background: #f1f1f1; }
 .lens-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Sketches: short visual notes. Light by default; dark follows the system setting (these pages only). */
+.sk { --sk-grey: #8a8a8a; --sk-red: #d55e00; --sk-blue: #0072b2; --sk-green: #009e73; --sk-faint: #d9d9d9; }
+.sk main { max-width: 44rem; }
+.sk .sk-title { font-size: 2rem; line-height: 1.2; font-weight: 600; margin: 0 0 1.6rem; letter-spacing: -.005em; }
+.sk main > p, .sk .sk-body p { font-size: 1.2rem; line-height: 1.65; margin: 0 0 1.2rem; max-width: 38rem; }
+.sk .c-red { color: var(--sk-red); font-weight: 600; }
+.sk .c-blue { color: var(--sk-blue); font-weight: 600; }
+.sk .c-green { color: var(--sk-green); font-weight: 600; }
+.sk figure { max-width: none; margin: 2.6rem 0; }
+.sk figure img { border: 0; display: block; }
+.sk .sk-anim { margin: 2.6rem 0; }
+.sk canvas { display: block; width: 100%; max-width: 34rem; aspect-ratio: 1 / .85; margin: 0 auto; }
+.sk .controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1rem 1.6rem; margin-top: .6rem; font-size: 1rem; color: var(--muted); }
+.sk .controls label { display: inline-flex; align-items: center; gap: .7rem; }
+.sk .controls input[type=range] { width: 11rem; accent-color: var(--accent); }
+.sk .controls output { font-variant-numeric: tabular-nums; color: var(--text); min-width: 2.4rem; }
+.sk .controls button { font: inherit; font-size: 1rem; padding: .35rem 1.1rem; border: 1px solid var(--rule); border-radius: 2rem; background: transparent; color: var(--text); cursor: pointer; }
+.sk .controls button:hover { border-color: var(--accent); color: var(--accent); }
+.sk h3.sk-h { font-size: .95rem; font-weight: 600; font-variant: small-caps; letter-spacing: .05em; color: var(--muted); margin: 3rem 0 .6rem; }
+.sk .refs { font-size: 1rem; line-height: 1.55; padding-left: 1.2rem; margin: 0 0 1.4rem; color: var(--muted); }
+.sk .refs li { margin-bottom: .5rem; }
+.sk .sk-note { font-size: .95rem !important; color: var(--muted); }
+.sk-list { list-style: none; margin: 2rem 0 0; padding: 0; }
+.sk-list li { margin: 0 0 3rem; }
+.sk-item { display: grid; grid-template-columns: 13rem 1fr; gap: 0 1.8rem; align-items: center; color: var(--text); }
+.sk-item:hover { text-decoration: none; }
+.sk-item:hover .sk-name { text-decoration: underline; }
+.sk-item img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 6px; display: block; }
+.sk-name { display: block; font-size: 1.3rem; font-weight: 600; line-height: 1.25; margin-bottom: .35rem; }
+.sk-one { display: block; color: var(--muted); font-size: 1.05rem; line-height: 1.45; }
+@media (max-width: 600px) {
+  .sk .sk-title { font-size: 1.55rem; }
+  .sk-item { grid-template-columns: 1fr; gap: .8rem; }
+  .sk main > p, .sk .sk-body p { font-size: 1.1rem; }
+}
+@media (prefers-color-scheme: dark) {
+  .sk { --bg: #14161a; --text: #ececec; --muted: #a3a3a3; --rule: #343840; --accent: #7fb2ee; --sk-grey: #8c8c8c; --sk-faint: #3a3d44; --sk-red: #f08a3c; --sk-blue: #56b4e9; --sk-green: #2fc79a; color-scheme: dark; }
+}

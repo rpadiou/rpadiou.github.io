@@ -1,0 +1,1 @@
+Rock-paper-scissors, self-play, Multiplicative Weights: the strategy spirals to the edge and never settles. Its time average converges to fair play (1/3, 1/3, 1/3). So does optimistic MWU, with no averaging. Animation + code: https://rpadiou.github.io/sketches/mwu-rps/

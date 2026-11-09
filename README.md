@@ -3,7 +3,7 @@
 Static site: plain HTML and CSS, no build step. Hosted on GitHub Pages (`.nojekyll` disables Jekyll).
 
 ## Editing
-- Pages: `index.html` (about, keywords, contact), `projects.html`, `cv.html`. Search for `TODO` to find what is left to fill in.
+- Pages: `index.html` (about, keywords, contact), `projects.html`, `cv.html`, `sketches/` (a listing page plus one folder per sketch, with its own code). Search for `TODO` to find what is left to fill in.
 - Each project is an `<article>` block in `projects.html`: copy one and paste it in the list (a comment says so). Papers go in `assets/papers/`, with a first-page image in `assets/img/`.
 - Education, teaching and experience live in the CV only. To update it, overwrite `assets/cv.pdf`, then regenerate the preview and re-check the clickable zones in `cv.html`:
       pdftoppm -jpeg -r 130 -f 1 -l 1 -singlefile assets/cv.pdf assets/img/cv-preview
