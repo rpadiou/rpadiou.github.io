@@ -6,7 +6,7 @@ Two players, zero-sum game, payoff matrix A for the row player.
 where g_t is the payoff vector of the player at time t. Both players use the
 same rule, simultaneously. Everything below is deterministic given the seed.
 
-Usage:  uv run mwu_rps.py            (writes ../tweet.png, ../figure-*.png, results.json)
+Usage:  uv run mwu_rps.py   (writes ../tweet.png, ../figure-uniform.png, ../figure-duel.png, results.json)
 """
 import json
 import pathlib
@@ -133,6 +133,13 @@ def verify(r):
             assert np.abs(q["Xa"][-1] - NASH).max() < 0.02, (eta, seed)      # average -> Nash
             assert exploitability(q["Xa"][-1], q["Ya"][-1]) < 0.06, (eta, seed)
             rob.append((eta, seed))
+    big = {}                       # optimistic MWU with larger step sizes (the page says it converges up to 0.5)
+    for eta in (0.3, 0.4, 0.5):
+        for seed in range(5):
+            q = run_all(eta, int(600 / eta), seed)
+            err = float(np.abs(q["Xo"][-1] - NASH).max())
+            assert err < 1e-3, (eta, seed, err)
+            big[f"{eta}"] = max(big.get(f"{eta}", 0.0), err)
     long = run_all(0.1, 20000)   # the average keeps getting closer as t grows
     assert np.abs(long["Xa"][-1] - NASH).max() < 0.005
     assert exploitability(long["Xa"][-1], long["Ya"][-1]) < 0.02
@@ -183,6 +190,7 @@ def verify(r):
         exploitability_avg_T20000_eta0p1=exploitability(long["Xa"][-1], long["Ya"][-1]),
         exploitability_mwu_last=exploitability(r["Xm"][-1], r["Ym"][-1]),
         robustness_cases=len(rob),
+        omwu_large_eta_max_error=big,
         vs_biased_opponent=dict(opponent=OPP.tolist(), eta=0.2, T=600, mwu_total=float(cum[-1]), best_fixed_total=float(bestfixed[-1].max()),
                                 regret=float(bestfixed[-1].max() - cum[-1]), regret_bound=float(bound), uniform_total=0.0),
         head_to_head=dict(eta=ETA, T=DUEL_T, optimistic_total=float(totd[-1]),
@@ -357,7 +365,7 @@ def duel_figure(path, r, eta=ETA, T=DUEL_T):
     th = THEMES["light"]
     plt.rcParams["font.family"] = "DejaVu Sans"
     fig = plt.figure(figsize=(11, 4.6), dpi=160, facecolor=th["bg"])
-    axes = [fig.add_axes([.075, .16, .40, .68], facecolor=th["bg"]), fig.add_axes([.60, .16, .38, .68], facecolor=th["bg"])]
+    axes = [fig.add_axes([.075, .16, .40, .64], facecolor=th["bg"]), fig.add_axes([.60, .16, .38, .64], facecolor=th["bg"])]
     for ax in axes:
         for s_ in ("top", "right"):
             ax.spines[s_].set_visible(False)
@@ -376,7 +384,8 @@ def duel_figure(path, r, eta=ETA, T=DUEL_T):
     ax.set_xlim(0, T * 1.02)
     ax.text(T * .03, ax.get_ylim()[1] * .92, "optimistic player's total\n(plain player: the opposite)", color=GREEN, fontsize=13, fontweight="bold", va="top", linespacing=1.25)
     ax.set_xlabel("round", color=th["grey"], fontsize=14); ax.set_ylabel("points won", color=th["grey"], fontsize=14)
-    fig.text(.075, .93, "Ahead in every one of 20 starts", color=th["fg"], fontsize=16, fontweight="bold", va="center")
+    fig.text(.075, .87, "one line per random starting point (same rule, same η)", color=th["grey"], fontsize=12, va="center")
+    fig.text(.075, .93, "Ahead in every one of 20 starts (η = 0.2)", color=th["fg"], fontsize=16, fontweight="bold", va="center")
     etas = (0.05, 0.1, 0.2, 0.4); means = []
     for k, e in enumerate(etas):
         T_ = int(600 / e); rates = []

@@ -13,7 +13,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="../../assets/fonts/stix-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../../assets/css/style.css?v=30">
+  <link rel="stylesheet" href="../../assets/css/style.css?v=32">
 </head>
 <body class="sk">
 <div class="layout">
@@ -56,7 +56,7 @@
         <p>Take rock-paper-scissors. If you always play rock, I will notice and play paper. The only safe thing is to mix your moves unpredictably, one third each. Then nothing I do gives me an edge. A pair of strategies where neither player gains by changing theirs alone is called a <strong>Nash equilibrium</strong>. Here it is unique: both players play (1/3, 1/3, 1/3).</p>
         <p>Now suppose the players know none of this. <strong>After each round, each player only learns what every move would have earned against the opponent's last play.</strong></p>
         <p>That amount is the move's <em>payoff</em>: +1 for a win, 0 for a draw, −1 for a loss.</p>
-        <p>The learning rule I look at is <strong>Multiplicative Weights</strong> (MWU, also called Hedge). Each move has a probability of being played. After every round, the player does two things:</p>
+        <p>The learning rule I look at is <strong>Multiplicative Weights</strong> (MWU, also called Hedge; Freund &amp; Schapire, 1997). Each move has a probability of being played. After every round, the player does two things:</p>
         <ol class="sk-steps">
           <li><strong>Multiply</strong> the probability of each move by <span class="mono">exp(η · payoff)</span>. This number is above 1 for a move that would have won, so its probability grows, and below 1 for a move that would have lost, so its probability shrinks.</li>
           <li><strong>Normalise</strong>: divide all three numbers by their sum, so that they add up to 1 again and can still be read as probabilities.</li>
@@ -65,7 +65,7 @@
 
         <h3 class="sk-sec" id="why">2. Why study it</h3>
         <p>The equilibrium of this game is known, and playing uniformly at random reaches it on the first move. So the goal is not to find 1/3. The game is a test tube: since we know the right answer, we can see what learners do when they do not. The question is what happens when two players who only see their own payoffs keep adapting to each other.</p>
-        <p>Real games are bigger: poker, auctions, markets, the two networks of a GAN. Nobody can write their equilibrium down, and rules of this family are used to approach it from payoffs alone. Two things then matter. One is whether the strategy actually being played settles down. In a real system what runs is the current strategy, and averaging past ones is often impossible (try averaging two neural networks). The other is how many rounds this takes.</p>
+        <p>Real games are bigger: poker, auctions, markets, the two networks of a GAN. Nobody can write their equilibrium down, and rules of this family are used to approach it from payoffs alone (counterfactual regret minimisation for poker, Zinkevich et al., 2007; see also Arora, Hazan &amp; Kale, 2012). Two things then matter. One is whether the strategy actually being played settles down. In a real system what runs is the current strategy, and averaging past ones is often impossible (try averaging two neural networks). The other is how many rounds this takes.</p>
         <p>Uniform play is also passive. It earns exactly 0 against anyone and never profits from a habit. That is the price of sitting at the equilibrium: <strong>it is safe, but it cannot exploit a player who strays from it</strong>, because exploiting means leaving it, and a player who leaves it can be exploited in turn.</p>
         <p>MWU takes that risk in small steps, and only as far as the payoffs justify. It knows nothing about the game and still ends up close to the best single move in hindsight: against an opponent who plays rock half the time, <strong>it finds paper on its own</strong>. Real opponents (a pricing bot, a trader, a poker player) have habits, so this is the case that matters.</p>
         <figure class="sk-fig-s">
@@ -112,7 +112,7 @@
 
       <div class="sk-body">
         <p class="sk-note">Both sliders are logarithmic. A small η gives a slow, wide spiral, so give it more rounds. A large η makes plain MWU reach the edge sooner. For optimistic MWU the theory needs a small η; in this run I checked numerically that it converges for η up to 0.5. The animation runs the same dynamics as the Python script, from the same start. Click a figure to enlarge it.</p>
-        <p><span class="c-red">Plain MWU does not settle.</span> The strategy spirals out to the edge of the triangle. The KL divergence to Nash, a measure of the distance between two probability vectors, grows at every round. In the default run it goes from 0.63 to 5.0 in 400 rounds, and one player ends up playing scissors 94% of the time. <span class="c-blue">The average does settle.</span> It is within 0.03 of (1/3, 1/3, 1/3) after 400 rounds, and in general within about η + 1/(ηT) of it. <span class="c-green">Optimistic MWU settles too</span>, with no averaging: the KL divergence falls from 0.63 to 0.003.</p>
+        <p><span class="c-red">Plain MWU does not settle.</span> The strategy spirals out to the edge of the triangle. The KL divergence to Nash, a measure of the distance between two probability vectors, grows at every round. In the default run it goes from 0.63 to 5.0 in 400 rounds, and one player ends up playing scissors 94% of the time. <span class="c-blue">The average does settle.</span> It is within 0.04 of (1/3, 1/3, 1/3) after 400 rounds, and in general the error is of order η + 1/(ηT). <span class="c-green">Optimistic MWU settles too</span>, with no averaging: the KL divergence falls from 0.63 to 0.003.</p>
 
         <h3 class="sk-sec" id="duel">5. Different rules</h3>
         <p>If the point is how learners adapt to each other, they should also meet learners that adapt differently. So I made optimistic MWU play against plain MWU, with the same η. Neither settles at Nash, but the optimistic player wins, by a little, in all 80 runs I tried.</p>
@@ -151,6 +151,6 @@
   </main>
 
 </div>
-<script src="anim.js?v=6"></script>
+<script src="anim.js?v=8"></script>
 </body>
 </html>

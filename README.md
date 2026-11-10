@@ -9,11 +9,11 @@ Static site: plain HTML and CSS, no build step. Hosted on GitHub Pages (`.nojeky
       pdftoppm -jpeg -r 130 -f 1 -l 1 -singlefile assets/cv.pdf assets/img/cv-preview
   (zone positions are percentages of the page; `PyMuPDF`'s `page.get_links()` lists the link rectangles).
 - Colors and font are at the top of `assets/css/style.css`. The font (STIX Two Text, OFL) is self-hosted in `assets/fonts/`: no external request.
-- One small script (`assets/js/figures.js`, only used on `projects.html`) opens and closes the enlarged figures (click, tap or Enter to open; Escape, the close button or a click outside to close); there is no other JavaScript.
+- Two small scripts, no library: `assets/js/figures.js` (only on `projects.html`) opens and closes the enlarged figures (click, tap or Enter to open; Escape, the close button or a click outside to close); `sketches/mwu-rps/anim.js` runs the animation of the sketch and enlarges its figures the same way.
 
 ## Preview
     python3 -m http.server 8000
 and open http://localhost:8000.
 
 ## Cache
-GitHub Pages serves CSS with a 10-minute cache. After changing `assets/css/style.css`, bump the `?v=` number in the `<link>` of the three pages so visitors get the new styles at once.
+GitHub Pages serves CSS with a 10-minute cache. After changing `assets/css/style.css`, bump the `?v=` number in the `<link>` of every page (`grep -rl 'style.css?v=' --include='*.html' .`) so visitors get the new styles at once.

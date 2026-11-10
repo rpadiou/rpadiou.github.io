@@ -61,7 +61,7 @@
     ctx.clearRect(0, 0, w, h);
     var red = css("--sk-red", "#d55e00"), blue = css("--sk-blue", "#0072b2"), green = css("--sk-green", "#009e73");
     var grey = css("--sk-grey", "#8a8a8a"), faint = css("--sk-faint", "#d9d9d9"), fg = css("--text", "#1a1a1a"), bg = css("--bg", "#fff");
-    var side = Math.min(w * 0.7, (h - 70) / 0.866);
+    var side = Math.min(w * 0.8, (h - 60) / 0.866);
     var ox = w / 2 - side / 2, oy = h - 34;
     function P(p) { return [ox + side * (p[0] * V[0][0] + p[1] * V[1][0] + p[2] * V[2][0]), oy - side * (p[0] * V[0][1] + p[1] * V[1][1] + p[2] * V[2][1])]; }
     var fs = Math.max(13, Math.min(18, w / 28));
@@ -111,7 +111,9 @@
       var q = P(path[upto]);
       ctx.shadowBlur = 12; ctx.shadowColor = color; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(q[0], q[1], 5, 0, 6.2832); ctx.fill(); ctx.shadowBlur = 0;
       if (align === "left" && q[0] > w * 0.7) { align = "right"; dx = -dx; }
-      ctx.textAlign = align; ctx.fillText(text, q[0] + dx, q[1] + dy);
+      var tw = ctx.measureText(text).width, tx = q[0] + dx;           // keep the label inside the canvas
+      if (align === "right") tx = Math.max(tx, tw + 4); else tx = Math.min(tx, w - tw - 4);
+      ctx.textAlign = align; ctx.fillText(text, tx, q[1] + dy);
     }
     tag(data.M, red, "MWU", 9, -14, "left");
     tag(data.O, green, "optimistic MWU", -14, 46, "right");
