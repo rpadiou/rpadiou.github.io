@@ -175,3 +175,9 @@ html { scroll-behavior: smooth; }
 .sk .katex-display { margin: 0; }
 .sk ul.sk-steps { margin: .2rem 0 1rem; padding-left: 1.4rem; }
 .sk ul.sk-steps li { margin-bottom: .45rem; }
+
+/* Generic project name, above the descriptive title */
+.pname { font-family: var(--mono); font-size: .85rem; color: var(--muted); }
+.sk-list .pname { display: block; margin-bottom: .2rem; }
+.sk .sk-kicker { margin: 0 0 .3rem !important; }
+.sk .sk-kicker + .sk-title { margin-top: 0; }
