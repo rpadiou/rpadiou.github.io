@@ -18,3 +18,8 @@ and open http://localhost:8000.
 
 ## Cache
 GitHub Pages serves CSS with a 10-minute cache. After changing `assets/css/style.css`, bump the `?v=` number in the `<link>` of every page (`grep -rl 'style.css?v=' --include='*.html' .`) so visitors get the new styles at once.
+
+## Checks
+    python3 scripts/make_sitemap.py   # regenerates sitemap.xml (lastmod = last commit of each page)
+    python3 scripts/site_check.py     # SEO and link checks, exit 1 on errors
+Install the pre-push hook (runs both, blocks the push on errors): `git config core.hooksPath scripts/hooks`. See `CLAUDE.md` for the checklists.
