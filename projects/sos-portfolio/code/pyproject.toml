@@ -1,0 +1,6 @@
+[project]
+name = "sos-portfolio-post"
+version = "0.1.0"
+description = "Figure of the sos-portfolio post (the paper's code lives in its own repository)"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.26", "matplotlib>=3.8"]

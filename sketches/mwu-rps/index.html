@@ -13,7 +13,8 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="../../assets/fonts/stix-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../../assets/css/style.css?v=33">
+  <link rel="stylesheet" href="../../assets/css/style.css?v=34">
+  <link rel="stylesheet" href="../../assets/katex/katex.min.css">
 </head>
 <body class="sk">
 <div class="layout">
@@ -60,10 +61,10 @@
         <p>That amount is the move's <em>payoff</em>: +1 for a win, 0 for a draw, −1 for a loss.</p>
         <p>The learning rule I look at is <strong>Multiplicative Weights</strong> (MWU, also called Hedge; Freund &amp; Schapire, 1997). Each move has a probability of being played. After every round, the player does two things:</p>
         <ol class="sk-steps">
-          <li><strong>Multiply</strong> the probability of each move by <span class="mono">exp(η · payoff)</span>. This number is above 1 for a move that would have won, so its probability grows, and below 1 for a move that would have lost, so its probability shrinks.</li>
+          <li><strong>Multiply</strong> the probability of each move by \(\exp(\eta \cdot \text{payoff})\). This number is above 1 for a move that would have won, so its probability grows, and below 1 for a move that would have lost, so its probability shrinks.</li>
           <li><strong>Normalise</strong>: divide all three numbers by their sum, so that they add up to 1 again and can still be read as probabilities.</li>
         </ol>
-        <p>The number η, the learning rate, says how hard the player reacts. A small η means small changes from one round to the next.</p>
+        <p>The number \(\eta\), the learning rate, says how hard the player reacts. A small \(\eta\) means small changes from one round to the next.</p>
 
         <h3 class="sk-sec" id="why">2. Why study it</h3>
         <p>The equilibrium of this game is known, and playing uniformly at random reaches it on the first move. So the goal is not to find 1/3. The game is a test tube: since we know the right answer, we can see what learners do when they do not. The question is what happens when two players who only see their own payoffs keep adapting to each other.</p>
@@ -72,21 +73,21 @@
         <p>MWU takes that risk in small steps, and only as far as the payoffs justify. It knows nothing about the game and still ends up close to the best single move in hindsight: against an opponent who plays rock half the time, <strong>it finds paper on its own</strong>. Real opponents (a pricing bot, a trader, a poker player) have habits, so this is the case that matters.</p>
         <figure class="sk-fig-s">
           <img src="figure-uniform.png" width="1760" height="704" alt="Left: against an opponent who favours rock, MWU puts its probability on paper within about 40 rounds. Right: its average payoff per round climbs from 0 to 0.3, the best single move, while uniform play stays at exactly zero.">
-          <figcaption>The opponent plays rock 50%, paper 30%, scissors 20% every round; η = 0.2, first 80 rounds shown. Paper beats rock more often than it loses to scissors, so it earns 0.3 per round on average, and MWU finds this from payoffs alone. Uniform play earns exactly 0 whatever the opponent does. Over 600 rounds, MWU ends within 6 points of the best single move in hindsight.</figcaption>
+          <figcaption>The opponent plays rock 50%, paper 30%, scissors 20% every round; \(\eta = 0.2\), first 80 rounds shown. Paper beats rock more often than it loses to scissors, so it earns 0.3 per round on average, and MWU finds this from payoffs alone. Uniform play earns exactly 0 whatever the opponent does. Over 600 rounds, MWU ends within 6 points of the best single move in hindsight.</figcaption>
         </figure>
-        <p>One caveat: the guarantee is against the best <em>fixed</em> move. An opponent who changes habits halfway is harder, and MWU with a fixed η is slow to follow. I did not plot that case.</p>
+        <p>One caveat: the guarantee is against the best <em>fixed</em> move. An opponent who changes habits halfway is harder, and MWU with a fixed \(\eta\) is slow to follow. I did not plot that case.</p>
 
         <h3 class="sk-sec" id="three">3. Three ways to play</h3>
         <p><strong>Plain MWU</strong> is the rule above. Its update only reacts to the payoffs of the round that just ended, so it is always one step late. If the opponent has been playing a lot of paper, scissors did well, and MWU moves towards scissors. By then the opponent has moved on to rock. Both players chase each other round the triangle. The steps have a finite size, so each loop ends slightly further out than it started, and the strategy drifts towards the edge (Bailey &amp; Piliouras, 2018).</p>
         <p><strong>The average of MWU</strong> is not a different player. It is the same sequence, averaged over time. The loops cancel out and the average goes to Nash, because over many rounds neither player can lose much compared with a fixed move. What is actually played is still the looping strategy, so this is a statement about the history, not about the play.</p>
-        <p><strong>Optimistic MWU</strong> (OMWU) changes the rule itself. The exponent uses <span class="mono">2g<sub>t</sub> − g<sub>t−1</sub></span> instead of <span class="mono">g<sub>t</sub></span>, where g<sub>t</sub> is the payoff vector at round t. Read it as <span class="mono">g<sub>t</sub> + (g<sub>t</sub> − g<sub>t−1</sub>)</span>: the latest payoff plus the change since the round before. With small steps, payoffs drift smoothly from one round to the next, so the next change should be close to the last one, and adding it gives a guess of the next payoff. The player reacts to where the opponent is going instead of where it was, which removes most of the lateness. The loops now shrink, and the strategy itself converges to Nash for small enough η (Daskalakis &amp; Panageas, 2019).</p>
-        <p>The variants exist because each one repairs something different. Averaging fixes the numbers but not the play. Optimism fixes the play, at the price of remembering one more payoff vector and of a convergence result that needs a small η. If you can store the average, it is enough. If you deploy the current strategy, as a GAN does (Daskalakis et al., 2018), you want optimism.</p>
+        <p><strong>Optimistic MWU</strong> (OMWU) changes the rule itself. The exponent uses \(2g_t - g_{t-1}\) instead of \(g_t\), where \(g_t\) is the payoff vector at round \(t\). Read it as \(g_t + (g_t - g_{t-1})\): the latest payoff plus the change since the round before. With small steps, payoffs drift smoothly from one round to the next, so the next change should be close to the last one, and adding it gives a guess of the next payoff. The player reacts to where the opponent is going instead of where it was, which removes most of the lateness. The loops now shrink, and the strategy itself converges to Nash for small enough \(\eta\) (Daskalakis &amp; Panageas, 2019).</p>
+        <p>The variants exist because each one repairs something different. Averaging fixes the numbers but not the play. Optimism fixes the play, at the price of remembering one more payoff vector and of a convergence result that needs a small \(\eta\). If you can store the average, it is enough. If you deploy the current strategy, as a GAN does (Daskalakis et al., 2018), you want optimism.</p>
         <table class="sk-tab">
           <thead><tr><th></th><th>Exponent</th><th>What is played</th><th>In self-play</th></tr></thead>
           <tbody>
-            <tr><td><span class="c-red">Plain MWU</span></td><td class="mono">g<sub>t</sub></td><td>current strategy</td><td>loops outwards, never settles</td></tr>
+            <tr><td><span class="c-red">Plain MWU</span></td><td>\(g_t\)</td><td>current strategy</td><td>loops outwards, never settles</td></tr>
             <tr><td><span class="c-blue">Its average</span></td><td>same as plain</td><td>current strategy (the average is only computed)</td><td>average goes to Nash</td></tr>
-            <tr><td><span class="c-green">Optimistic MWU</span></td><td class="mono">2g<sub>t</sub> − g<sub>t−1</sub></td><td>current strategy</td><td>loops inwards, converges</td></tr>
+            <tr><td><span class="c-green">Optimistic MWU</span></td><td>\(2g_t - g_{t-1}\)</td><td>current strategy</td><td>loops inwards, converges</td></tr>
           </tbody>
         </table>
 
@@ -106,23 +107,23 @@
           </figure>
         </div>
         <div class="controls">
-          <label for="eta">Step size η <input id="eta" type="range" min="0" max="100" step="0.1" value="76.6"><output id="eta-out" for="eta">0.2</output></label>
+          <label for="eta">Step size \(\eta\) <input id="eta" type="range" min="0" max="100" step="0.1" value="76.6"><output id="eta-out" for="eta">0.2</output></label>
           <label for="rounds">Rounds <input id="rounds" type="range" min="0" max="100" step="0.1" value="45.2"><output id="rounds-out" for="rounds">400</output></label>
           <button id="replay" type="button">Play</button>
         </div>
       </div>
 
       <div class="sk-body">
-        <p class="sk-note">Both sliders are logarithmic. A small η gives a slow, wide spiral, so give it more rounds. A large η makes plain MWU reach the edge sooner. For optimistic MWU the theory needs a small η; in this run I checked numerically that it converges for η up to 0.5. The animation runs the same dynamics as the Python script, from the same start. Click a figure to enlarge it.</p>
-        <p><span class="c-red">Plain MWU does not settle.</span> The strategy spirals out to the edge of the triangle. The KL divergence to Nash, a measure of the distance between two probability vectors, grows at every round. In the default run it goes from 0.63 to 5.0 in 400 rounds, and one player ends up playing scissors 94% of the time. <span class="c-blue">The average does settle.</span> It is within 0.04 of (1/3, 1/3, 1/3) after 400 rounds, and in general the error is of order η + 1/(ηT). <span class="c-green">Optimistic MWU settles too</span>, with no averaging: the KL divergence falls from 0.63 to 0.003.</p>
+        <p class="sk-note">Both sliders are logarithmic. A small \(\eta\) gives a slow, wide spiral, so give it more rounds. A large \(\eta\) makes plain MWU reach the edge sooner. For optimistic MWU the theory needs a small \(\eta\); in this run I checked numerically that it converges for \(\eta\) up to 0.5. The animation runs the same dynamics as the Python script, from the same start. Click a figure to enlarge it.</p>
+        <p><span class="c-red">Plain MWU does not settle.</span> The strategy spirals out to the edge of the triangle. The KL divergence to Nash, a measure of the distance between two probability vectors, grows at every round. In the default run it goes from 0.63 to 5.0 in 400 rounds, and one player ends up playing scissors 94% of the time. <span class="c-blue">The average does settle.</span> It is within 0.04 of (1/3, 1/3, 1/3) after 400 rounds, and in general the error is of order \(\eta + 1/(\eta T)\). <span class="c-green">Optimistic MWU settles too</span>, with no averaging: the KL divergence falls from 0.63 to 0.003.</p>
 
         <h3 class="sk-sec" id="duel">5. Different rules</h3>
-        <p>If the point is how learners adapt to each other, they should also meet learners that adapt differently. So I made optimistic MWU play against plain MWU, with the same η. Neither settles at Nash, but the optimistic player wins, by a little, in all 80 runs I tried.</p>
+        <p>If the point is how learners adapt to each other, they should also meet learners that adapt differently. So I made optimistic MWU play against plain MWU, with the same \(\eta\). Neither settles at Nash, but the optimistic player wins, by a little, in all 80 runs I tried.</p>
         <p>Why? <strong>The optimistic player answers where the opponent is heading, while the plain one answers where the opponent was.</strong> That is the lateness of section 3, and it now costs points. I did not prove it; it fits the check that the optimistic player's moves are on average closer to a best response to the opponent's current strategy.</p>
       </div>
       <figure class="sk-fig-s sk-fig-wide">
         <img src="figure-duel.png" width="1760" height="736" alt="Left: total points of the optimistic MWU player against plain MWU over 3000 rounds, for 20 starting points, all rising. Right: points per round gained by the optimistic player for four step sizes, growing with the step size.">
-        <figcaption>Optimistic MWU against plain MWU. The game is zero-sum, so the plain player's total is the opposite of the one drawn. Left: η = 0.2, 3000 rounds, 20 random starting points; the thick line is the start used above. Right: points per round for η from 0.05 to 0.4 (20 starts each, line: mean).</figcaption>
+        <figcaption>Optimistic MWU against plain MWU. The game is zero-sum, so the plain player's total is the opposite of the one drawn. Left: \(\eta = 0.2\), 3000 rounds, 20 random starting points; the thick line is the start used above. Right: points per round for \(\eta\) from 0.05 to 0.4 (20 starts each, line: mean).</figcaption>
       </figure>
 
       <div class="sk-body">
@@ -132,8 +133,8 @@
           <tbody>
             <tr><td>You know the game and want a safe strategy</td><td>Compute the equilibrium and play it. Nothing to learn, nothing to gain.</td></tr>
             <tr><td>Unknown game or opponent, and you can keep the history</td><td>Plain MWU, and use its <span class="c-blue">average</span>. Simple, with a regret guarantee.</td></tr>
-            <tr><td>What you deploy is the current strategy (a GAN, a live policy)</td><td><span class="c-green">Optimistic MWU</span> with a small η.</td></tr>
-            <tr><td>The opponent keeps changing habits</td><td>Plain MWU with a fixed η follows slowly. Variants exist; I did not test them.</td></tr>
+            <tr><td>What you deploy is the current strategy (a GAN, a live policy)</td><td><span class="c-green">Optimistic MWU</span> with a small \(\eta\).</td></tr>
+            <tr><td>The opponent keeps changing habits</td><td>Plain MWU with a fixed \(\eta\) follows slowly. Variants exist; I did not test them.</td></tr>
           </tbody>
         </table>
         <p>Against a learner of another kind, optimism never lost in my tests, but it gained little. All of this is on a game with three moves and a unique equilibrium. The theorems come from the cited papers; here I only checked numerically that they hold.</p>
@@ -153,6 +154,10 @@
   </main>
 
 </div>
-<script src="anim.js?v=8"></script>
+<script src="../../assets/katex/katex.min.js"></script>
+<script src="../../assets/katex/auto-render.min.js"></script>
+<script src="../../assets/js/math.js" defer></script>
+<script src="../../assets/js/zoom.js" defer></script>
+<script src="anim.js?v=9"></script>
 </body>
 </html>

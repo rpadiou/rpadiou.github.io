@@ -211,23 +211,6 @@
     cv.addEventListener("click", function () { openZoom(cv); });
     cv.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openZoom(cv); } });
   });
-  // Static figures open the same way.
-  Array.prototype.forEach.call(document.querySelectorAll(".sk figure img"), function (img) {
-    img.classList.add("zoomable");
-    img.addEventListener("click", function () {
-      closeZoom();
-      overlay = document.createElement("div"); overlay.className = "sk-zoom";
-      var box = document.createElement("div"); box.className = "sk-zoom-box"; box.setAttribute("role", "dialog"); box.setAttribute("aria-label", "Enlarged figure");
-      var x = document.createElement("button"); x.type = "button"; x.className = "sk-zoom-x"; x.textContent = "\u00d7"; x.setAttribute("aria-label", "Close");
-      var big = document.createElement("img"); big.src = img.src; big.alt = img.alt;
-      box.appendChild(x); box.appendChild(big);
-      var cap = img.parentNode.querySelector("figcaption");
-      if (cap) { var p = document.createElement("p"); p.textContent = cap.textContent; box.appendChild(p); }
-      overlay.appendChild(box); host.appendChild(overlay);
-      overlay.addEventListener("click", function (e) { if (e.target === overlay || e.target === x) closeZoom(); });
-      x.focus();
-    });
-  });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeZoom(); });
 
   compute();                            // final state on load; the button plays it
