@@ -238,3 +238,17 @@ html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 .sk ol.sk-steps { margin: .2rem 0 1rem; padding-left: 1.4rem; }
 .sk ol.sk-steps li { margin-bottom: .5rem; }
+
+/* News (home) and discreet publication dates */
+.news { list-style: none; margin: 0; padding: 0; max-width: 41.25rem; }
+.news li { display: grid; grid-template-columns: 6.2rem 1fr; gap: .1rem 1rem; padding: .7rem 0; border-top: 1px solid var(--rule); }
+.news li:last-child { border-bottom: 1px solid var(--rule); }
+.news time { color: var(--muted); font-size: .88rem; font-variant-numeric: tabular-nums; padding-top: .15rem; }
+.news .kind { font-variant: small-caps; letter-spacing: .04em; color: var(--muted); font-size: .9rem; margin-right: .3rem; }
+.news .upd, .news .upd time { color: var(--muted); font-size: .82rem; white-space: nowrap; }
+.news p { margin: .15rem 0 0; color: var(--muted); font-size: .92rem; line-height: 1.45; }
+.pdate { color: var(--muted); font-size: .8rem; margin: -.1rem 0 .5rem !important; font-variant-numeric: tabular-nums; }
+.pdate time { color: inherit; }
+.sk-list .pdate { margin: 0 0 0 .6rem !important; white-space: nowrap; }
+.sk .sk-date { margin: -.6rem 0 1.2rem !important; }
+@media (max-width: 500px) { .news li { grid-template-columns: 1fr; } }
