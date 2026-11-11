@@ -23,3 +23,6 @@ GitHub Pages serves CSS with a 10-minute cache. After changing `assets/css/style
     python3 scripts/make_sitemap.py   # regenerates sitemap.xml (lastmod = last commit of each page)
     python3 scripts/site_check.py     # SEO and link checks, exit 1 on errors
 Install the pre-push hook (runs both, blocks the push on errors): `git config core.hooksPath scripts/hooks`. See `CLAUDE.md` for the checklists.
+
+## Favicon
+Source: `favicon.svg` (root). `python3 scripts/make_favicons.py` regenerates `favicon.ico`, `favicon-{48,96,192}.png` and `apple-touch-icon.png` (needs Pillow and Playwright's headless Chromium).

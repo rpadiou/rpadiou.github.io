@@ -3,6 +3,7 @@
 import datetime
 import json
 import re
+import struct
 import sys
 import urllib.parse
 import xml.etree.ElementTree as ET
@@ -23,7 +24,7 @@ class Page(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.title = None; self._in_title = False
         self.meta = {}; self.canonical = []; self.h1 = 0
-        self.imgs = []; self.refs = []; self.ids = set(); self.jsonld = []; self._in_ld = False; self._ld = ""
+        self.imgs = []; self.refs = []; self.ids = set(); self.jsonld = []; self.icons = []; self._in_ld = False; self._ld = ""
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
@@ -34,6 +35,7 @@ class Page(HTMLParser):
             if key: self.meta.setdefault(key, []).append(a.get("content", ""))
         elif tag == "link":
             if a.get("rel") == "canonical": self.canonical.append(a.get("href", ""))
+            if a.get("rel") in ("icon", "apple-touch-icon"): self.icons.append(a)
             if a.get("href"): self.refs.append(a["href"])
         elif tag == "h1": self.h1 += 1
         elif tag == "img":
@@ -157,6 +159,23 @@ for rel, p in parsed.items():
             ids = p.ids if path == (ROOT / rel).resolve() else (parsed[path.relative_to(ROOT)].ids if path.relative_to(ROOT) in parsed else None)
             if ids is not None and frag not in ids: err(pg, f"ancre introuvable : {ref}")
 
+    # favicons: SVG + PNG (sizes multiple of 48 px, Google) + ICO + apple-touch-icon, files present
+    def icon(rel_, typ=None, ext=None):
+        return [i for i in p.icons if i.get("rel") == rel_ and (typ is None or i.get("type") == typ) and (ext is None or i.get("href", "").endswith(ext))]
+    if not icon("icon", "image/svg+xml"): err(pg, "favicon SVG non déclarée")
+    if not icon("icon", None, ".ico"): err(pg, "favicon.ico non déclarée")
+    if not icon("apple-touch-icon"): err(pg, "apple-touch-icon non déclarée")
+    pngs = icon("icon", "image/png")
+    if not pngs: err(pg, "favicon PNG non déclarée")
+    for i in p.icons:
+        href = i.get("href", ""); f = local_target(href, rel)[0]
+        if not f.is_file(): err(pg, f"favicon introuvable ({href})"); continue
+        if f.suffix == ".png":
+            head = f.read_bytes()[:24]
+            w, h = struct.unpack(">II", head[16:24]) if head[:8] == b"\x89PNG\r\n\x1a\n" else (0, 0)
+            if not i.get("sizes"): err(pg, f"favicon sans attribut sizes ({href})")
+            elif i["sizes"] != f"{w}x{h}": err(pg, f"favicon {href} : sizes={i['sizes']} ≠ dimensions réelles {w}x{h}")
+            if i.get("type") == "image/png" and (w != h or w % 48): err(pg, f"favicon PNG {href} : {w}x{h}, doit être carré et multiple de 48 px")
     if home:
         if not p.jsonld: err(pg, "JSON-LD absent")
         for raw in p.jsonld:
