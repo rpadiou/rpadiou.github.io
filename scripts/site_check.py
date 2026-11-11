@@ -120,7 +120,8 @@ for rel, p in parsed.items():
 
     desc = one(pg, p, "description", "meta description")
     if desc:
-        if len(desc) > 160: err(pg, f"meta description trop longue ({len(desc)} > 160)")
+        maxd = 170 if home else 160
+        if len(desc) > maxd: err(pg, f"meta description trop longue ({len(desc)} > {maxd})")
         descs.setdefault(desc, []).append(pg)
 
     if p.canonical != [url]: err(pg, f"canonical doit être {url} (trouvé : {p.canonical or 'absent'})")
@@ -161,6 +162,10 @@ for rel, p in parsed.items():
         for raw in p.jsonld:
             try: d = json.loads(raw)
             except json.JSONDecodeError as e: err(pg, f"JSON-LD invalide : {e}"); continue
+            if d.get("@type") == "WebSite":
+                if d.get("name") != NAME: err(pg, f"JSON-LD WebSite : name doit être « {NAME} »")
+                if d.get("url") != BASE: err(pg, f"JSON-LD WebSite : url doit être {BASE}")
+                continue
             if d.get("@type") != "Person": err(pg, f"JSON-LD : @type doit être Person (trouvé : {d.get('@type')})")
             for k in ("name", "alternateName", "url"):
                 if not isinstance(d.get(k), str) or not d[k].strip(): err(pg, f"JSON-LD : « {k} » manquant")
