@@ -25,4 +25,4 @@ GitHub Pages serves CSS with a 10-minute cache. After changing `assets/css/style
 Install the pre-push hook (runs both, blocks the push on errors): `git config core.hooksPath scripts/hooks`. See `CLAUDE.md` for the checklists.
 
 ## Favicon
-Source: `favicon.svg` (root). `python3 scripts/make_favicons.py` regenerates `favicon.ico`, `favicon-{48,96,192}.png` and `apple-touch-icon.png` (needs Pillow and Playwright's headless Chromium).
+Source: `favicon.svg` (root). `python3 scripts/make_favicons.py` regenerates `favicon.ico`, `favicon-{48,96,192}.png` and `apple-touch-icon.png` (needs Pillow, fontTools and Playwright's headless Chromium; the letters of the SVG are outlines of Noto Serif, no font needed).

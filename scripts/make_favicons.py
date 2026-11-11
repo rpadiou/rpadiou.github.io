@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate every favicon from favicon.svg (root). Needs chromium (headless) and Pillow.
+"""Regenerate favicon.svg (letters converted to outlines, so no font is needed to display it) and every PNG/ICO from it. Needs chromium (headless) and Pillow.
 Usage: python3 scripts/make_favicons.py"""
 import pathlib, subprocess, tempfile
 from PIL import Image
@@ -7,6 +7,25 @@ from PIL import Image
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SVG = ROOT / "favicon.svg"
 import glob, os
+from fontTools.ttLib import TTFont
+from fontTools.pens.svgPathPen import SVGPathPen
+from fontTools.pens.transformPen import TransformPen
+
+FONT = "/usr/share/fonts/truetype/noto/NotoSerif-Regular.ttf"  # what Georgia falls back to here
+TEXT, SIZE, CX, BASE = "RP", 34, 32, 44  # same layout as the original <text>
+
+def outline_svg():
+    f = TTFont(FONT); gs = f.getGlyphSet(); cmap = f.getBestCmap(); k = SIZE / f["head"].unitsPerEm
+    width = sum(f["hmtx"][cmap[ord(c)]][0] for c in TEXT) * k
+    x = CX - width / 2; pen = SVGPathPen(gs, ntos=lambda v: f"{v:.2f}".rstrip("0").rstrip("."))
+    for c in TEXT:
+        g = cmap[ord(c)]
+        gs[g].draw(TransformPen(pen, (k, 0, 0, -k, x, BASE)))
+        x += f["hmtx"][g][0] * k
+    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#000000"/>'
+            f'<path fill="#fff" d="{pen.getCommands()}"/></svg>\n')
+
+SVG.write_text(outline_svg())
 # Playwright's headless shell (the snap chromium cannot write outside its sandbox)
 CHROME = glob.glob(os.path.expanduser("~/.cache/ms-playwright/chromium_headless_shell-*/*/chrome-headless-shell"))[0]
 
